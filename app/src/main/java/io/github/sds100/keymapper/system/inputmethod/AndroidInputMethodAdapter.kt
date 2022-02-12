@@ -23,6 +23,7 @@ import io.github.sds100.keymapper.util.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
 import timber.log.Timber
 
@@ -169,6 +170,24 @@ class AndroidInputMethodAdapter(
 
     private fun enableImeWithoutUserInput(imeId: String): Result<*> {
         return suAdapter.execute("ime enable $imeId")
+    }
+
+    override fun chooseImeWithoutUserInputBlocking(imeId: String) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && serviceAdapter.state.value == ServiceState.ENABLED) {
+            runBlocking {
+                serviceAdapter.send(Event.ChangeIme(imeId))
+            }
+
+            return
+        }
+
+        if (permissionAdapter.isGranted(Permission.WRITE_SECURE_SETTINGS)) {
+            SettingsUtils.putSecureSetting(
+                ctx,
+                Settings.Secure.DEFAULT_INPUT_METHOD,
+                imeId
+            )
+        }
     }
 
     override suspend fun chooseImeWithoutUserInput(imeId: String): Result<ImeInfo> {

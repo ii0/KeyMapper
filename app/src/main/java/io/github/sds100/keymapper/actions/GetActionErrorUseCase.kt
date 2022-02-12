@@ -45,93 +45,116 @@ class GetActionErrorUseCaseImpl(
         shizukuAdapter.isInstalled.drop(1).map { }
     )
 
-    override fun getError(action: ActionData): Error? {
-        if (action.canUseShizukuToPerform() && shizukuAdapter.isInstalled.value) {
+    override fun getErrors(actionList: List<ActionData>): Map<ActionData, Error?> {
+        val errorMap = mutableMapOf<ActionData, Error?>()
 
-            if (!(action.canUseImeToPerform() && keyMapperImeHelper.isCompatibleImeChosen())) {
-                when {
-                    !shizukuAdapter.isStarted.value ->
-                        return Error.ShizukuNotStarted
+        /*
+        See issue #797. Simulate which ime is chosen while the actions are being performed. This is so that any
+        actions that depend on a compatible ime being chosen only show an error if no previous action will select
+        the correct ime for it.
+         */
+        var simulatedChosenIme: String? = null
 
-                    !permissionAdapter.isGranted(Permission.SHIZUKU) ->
-                        return Error.PermissionDenied(Permission.SHIZUKU)
+        for (action in actionList) {
+            var error: Error? = null
+
+            if (action is ActionData.SwitchKeyboard) {
+                simulatedChosenIme = action.imeId
+            }
+
+            if (action.canUseShizukuToPerform() && shizukuAdapter.isInstalled.value) {
+                if (!(action.canUseImeToPerform() && keyMapperImeHelper.isCompatibleImeChosen())) {
+                    when {
+                        !shizukuAdapter.isStarted.value ->
+                            error = Error.ShizukuNotStarted
+
+                        !permissionAdapter.isGranted(Permission.SHIZUKU) ->
+                            error = Error.PermissionDenied(Permission.SHIZUKU)
+                    }
                 }
-            }
-        } else if (action.canUseImeToPerform()) {
-            if (!keyMapperImeHelper.isCompatibleImeEnabled()) {
-                return Error.NoCompatibleImeEnabled
-            }
-
-            if (!keyMapperImeHelper.isCompatibleImeChosen()) {
-                return Error.NoCompatibleImeChosen
-            }
-        }
-
-        isActionSupported.invoke(action.id)?.let {
-            return it
-        }
-
-        ActionUtils.getRequiredPermissions(action.id).forEach { permission ->
-            if (!permissionAdapter.isGranted(permission)) {
-                return Error.PermissionDenied(permission)
-            }
-        }
-
-        when (action) {
-            is ActionData.App -> {
-                return getAppError(action.packageName)
-            }
-
-            is ActionData.AppShortcut -> {
-                action.packageName ?: return null
-
-                return getAppError(action.packageName)
-            }
-
-            is ActionData.InputKeyEvent ->
-                if (
-                    action.useShell && !permissionAdapter.isGranted(Permission.ROOT)
-                ) {
-                    return Error.PermissionDenied(Permission.ROOT)
+            } else if (action.canUseImeToPerform()) {
+                if (!keyMapperImeHelper.isCompatibleImeEnabled()) {
+                    error = Error.NoCompatibleImeEnabled
                 }
 
-            is ActionData.TapScreen ->
-                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
-                    return Error.SdkVersionTooLow(Build.VERSION_CODES.N)
-                }
+                val isCompatibleImeChosen =
+                    if (simulatedChosenIme != null) {
+                        keyMapperImeHelper.isCompatibleIme(simulatedChosenIme)
+                    } else {
+                        keyMapperImeHelper.isCompatibleImeChosen()
+                    }
 
-            is ActionData.PhoneCall ->
-                if (!permissionAdapter.isGranted(Permission.CALL_PHONE)) {
-                    return Error.PermissionDenied(Permission.CALL_PHONE)
-                }
-
-            is ActionData.Sound -> {
-                soundsManager.getSound(action.soundUid).onFailure { error ->
-                    return error
+                if (!isCompatibleImeChosen) {
+                    error = Error.NoCompatibleImeChosen
                 }
             }
 
-            is ActionData.VoiceAssistant -> {
-                if (!packageManager.isVoiceAssistantInstalled()) {
-                    return Error.NoVoiceAssistant
+            isActionSupported.invoke(action.id)?.let {
+                error = it
+            }
+
+            ActionUtils.getRequiredPermissions(action.id).forEach { permission ->
+                if (!permissionAdapter.isGranted(permission)) {
+                    error = Error.PermissionDenied(permission)
                 }
             }
 
-            is ActionData.Flashlight ->
-                if (!cameraAdapter.hasFlashFacing(action.lens)) {
-                    return when (action.lens) {
-                        CameraLens.FRONT -> Error.FrontFlashNotFound
-                        CameraLens.BACK -> Error.BackFlashNotFound
+            when (action) {
+                is ActionData.App -> {
+                    error = getAppError(action.packageName)
+                }
+
+                is ActionData.AppShortcut -> {
+                    if (action.packageName != null) {
+                        error = getAppError(action.packageName)
                     }
                 }
 
-            is ActionData.SwitchKeyboard ->
-                inputMethodAdapter.getInfoById(action.imeId).onFailure {
-                    return it
+                is ActionData.InputKeyEvent ->
+                    if (action.useShell && !permissionAdapter.isGranted(Permission.ROOT)) {
+                        error = Error.PermissionDenied(Permission.ROOT)
+                    }
+
+                is ActionData.TapScreen ->
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
+                        error = Error.SdkVersionTooLow(Build.VERSION_CODES.N)
+                    }
+
+                is ActionData.PhoneCall ->
+                    if (!permissionAdapter.isGranted(Permission.CALL_PHONE)) {
+                        error = Error.PermissionDenied(Permission.CALL_PHONE)
+                    }
+
+                is ActionData.Sound -> {
+                    soundsManager.getSound(action.soundUid).onFailure { soundError ->
+                        error = soundError
+                    }
                 }
+
+                is ActionData.VoiceAssistant -> {
+                    if (!packageManager.isVoiceAssistantInstalled()) {
+                        error = Error.NoVoiceAssistant
+                    }
+                }
+
+                is ActionData.Flashlight ->
+                    if (!cameraAdapter.hasFlashFacing(action.lens)) {
+                        error = when (action.lens) {
+                            CameraLens.FRONT -> Error.FrontFlashNotFound
+                            CameraLens.BACK -> Error.BackFlashNotFound
+                        }
+                    }
+
+                is ActionData.SwitchKeyboard ->
+                    inputMethodAdapter.getInfoById(action.imeId).onFailure { imeError ->
+                        error = imeError
+                    }
+            }
+
+            errorMap[action] = error
         }
 
-        return null
+        return errorMap
     }
 
     private fun getAppError(packageName: String): Error? {
@@ -151,5 +174,5 @@ class GetActionErrorUseCaseImpl(
 
 interface GetActionErrorUseCase {
     val invalidateActionErrors: Flow<Unit>
-    fun getError(action: ActionData): Error?
+    fun getErrors(actionList: List<ActionData>): Map<ActionData, Error?>
 }

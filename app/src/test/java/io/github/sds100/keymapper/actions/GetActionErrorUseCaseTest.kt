@@ -4,6 +4,7 @@ import android.view.KeyEvent
 import io.github.sds100.keymapper.shizuku.ShizukuAdapter
 import io.github.sds100.keymapper.system.inputmethod.ImeInfo
 import io.github.sds100.keymapper.system.inputmethod.InputMethodAdapter
+import io.github.sds100.keymapper.system.permissions.Permission
 import io.github.sds100.keymapper.system.permissions.PermissionAdapter
 import io.github.sds100.keymapper.util.Error
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -56,6 +57,71 @@ class GetActionErrorUseCaseTest {
     }
 
     /**
+     * #797
+     */
+    @Test
+    fun `return error that ime must be chosen if there are no previous actions change the ime`() =
+        coroutineScope.runBlockingTest {
+            //GIVEN
+            val actionList = mutableListOf(
+                ActionData.InputKeyEvent(KeyEvent.KEYCODE_A)
+            )
+
+            //WHEN
+            whenever(mockShizukuAdapter.isInstalled).then { MutableStateFlow(false) }
+
+            val fakeImeInfo = ImeInfo(
+                id = "bla",
+                packageName = "not_key_mapper",
+                label = "not key mapper",
+                isEnabled = true,
+                isChosen = true
+            )
+
+            whenever(mockInputMethodAdapter.inputMethods).then { MutableStateFlow(listOf(fakeImeInfo)) }
+            whenever(mockInputMethodAdapter.chosenIme).then { MutableStateFlow(fakeImeInfo) }
+
+            val errorMap = useCase.getErrors(actionList)
+
+            //THEN
+            assertThat(errorMap[actionList[0]], `is`(Error.NoCompatibleImeChosen))
+        }
+
+    /**
+     * #797
+     */
+    @Test
+    fun `don't return error that ime must be chosen if previous action selects that ime`() =
+        coroutineScope.runBlockingTest {
+            //GIVEN
+            val keyMapperKeyboardImeId = "io.github.sds100.keymapper.inputmethod.latin/.LatinIME"
+            val actionList = mutableListOf(
+                ActionData.SwitchKeyboard(keyMapperKeyboardImeId, "Key Mapper GUI Keyboard"),
+                ActionData.InputKeyEvent(KeyEvent.KEYCODE_A)
+            )
+
+            //WHEN
+            whenever(mockShizukuAdapter.isInstalled).then { MutableStateFlow(false) }
+
+            val fakeImeInfo = ImeInfo(
+                id = keyMapperKeyboardImeId,
+                packageName = "io.github.sds100.keymapper.inputmethod.latin",
+                label = "Key Mapper GUI Keyboard",
+                isEnabled = true,
+                isChosen = true
+            )
+
+            whenever(mockInputMethodAdapter.inputMethods).then { MutableStateFlow(listOf(fakeImeInfo)) }
+            whenever(mockPermissionAdapter.isGranted(Permission.WRITE_SECURE_SETTINGS)).then { true }
+
+            val errorMap = useCase.getErrors(actionList)
+
+            //THEN
+            assertThat(errorMap[actionList[0]], nullValue())
+            assertThat(errorMap[actionList[1]], nullValue())
+        }
+
+    /**
      * #776
      */
     @Test
@@ -63,19 +129,22 @@ class GetActionErrorUseCaseTest {
         //GIVEN
         whenever(mockShizukuAdapter.isInstalled).then { MutableStateFlow(true) }
         whenever(mockInputMethodAdapter.chosenIme).then {
-            MutableStateFlow(ImeInfo(
-                id = "ime_id",
-                packageName = "io.github.sds100.keymapper.inputmethod.latin",
-                label = "Key Mapper GUI Keyboard",
-                isEnabled = true,
-                isChosen = true
-            ))
+            MutableStateFlow(
+                ImeInfo(
+                    id = "ime_id",
+                    packageName = "io.github.sds100.keymapper.inputmethod.latin",
+                    label = "Key Mapper GUI Keyboard",
+                    isEnabled = true,
+                    isChosen = true
+                )
+            )
         }
 
         val action = ActionData.InputKeyEvent(keyCode = KeyEvent.KEYCODE_VOLUME_DOWN)
 
         //WHEN
-        val error = useCase.getError(action)
+        val errorMap = useCase.getErrors(listOf(action))
+        val error = errorMap[action]
 
         //THEN
         assertThat(error, nullValue())
@@ -91,18 +160,22 @@ class GetActionErrorUseCaseTest {
         whenever(mockShizukuAdapter.isStarted).then { MutableStateFlow(false) }
 
         whenever(mockInputMethodAdapter.chosenIme).then {
-            MutableStateFlow(ImeInfo(
-                id = "ime_id",
-                packageName = "io.gboard",
-                label = "Gboard",
-                isEnabled = true,
-                isChosen = true
-            ))
+            MutableStateFlow(
+                ImeInfo(
+                    id = "ime_id",
+                    packageName = "io.gboard",
+                    label = "Gboard",
+                    isEnabled = true,
+                    isChosen = true
+                )
+            )
         }
 
         val action = ActionData.InputKeyEvent(keyCode = KeyEvent.KEYCODE_VOLUME_DOWN)
+
         //WHEN
-        val error = useCase.getError(action)
+        val errorMap = useCase.getErrors(listOf(action))
+        val error = errorMap[action]
 
         //THEN
         assertThat(error, `is`(Error.ShizukuNotStarted))

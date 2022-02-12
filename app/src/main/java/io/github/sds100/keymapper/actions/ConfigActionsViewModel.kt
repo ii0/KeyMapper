@@ -71,11 +71,12 @@ class ConfigActionsViewModel<A : Action, M : Mapping<A>>(
 
     fun onModelClick(uid: String) {
         coroutineScope.launch(Dispatchers.Default) {
-            config.mapping.first().ifIsData { data ->
-                val actionData = data.actionList.singleOrNull { it.uid == uid }?.data
+            config.mapping.first().ifIsData { mapping ->
+                val actionData = mapping.actionList.singleOrNull { it.uid == uid }?.data
                     ?: return@launch
 
-                val error = displayActionUseCase.getError(actionData)
+                val errorMap = displayActionUseCase.getErrors(mapping.actionList.map { it.data })
+                val error = errorMap[actionData]
 
                 when {
                     error == null -> attemptTestAction(actionData)
@@ -282,6 +283,7 @@ class ConfigActionsViewModel<A : Action, M : Mapping<A>>(
     private fun createListItems(mapping: M, showDeviceDescriptors: Boolean): List<ActionListItem> {
         val actionCount = mapping.actionList.size
 
+        val errorMap = uiHelper.getErrors(mapping.actionList.map { it.data })
         return mapping.actionList.map { action ->
 
             val title: String = if (action.multiplier != null && action.multiplier!! > 1) {
@@ -292,7 +294,7 @@ class ConfigActionsViewModel<A : Action, M : Mapping<A>>(
             }
 
             val icon: IconInfo? = uiHelper.getIcon(action.data)
-            val error: Error? = uiHelper.getError(action.data)
+            val error: Error? = errorMap[action.data]
 
             val extraInfo = buildString {
                 val midDot = getString(R.string.middot)

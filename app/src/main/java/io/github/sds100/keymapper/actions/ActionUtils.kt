@@ -15,6 +15,19 @@ import io.github.sds100.keymapper.system.permissions.Permission
 
 object ActionUtils {
 
+    /**
+     * Issue #797
+     * Whether [action] can affect whether other actions have an error.
+     * E.g the action to switch an input method can affect whether another action, which requires
+     * a certain input method to be chosen, can work.
+     */
+    fun actionAffectsOtherActionErrors(action: ActionData): Boolean {
+        return when (action) {
+            is ActionData.SwitchKeyboard -> true
+            else -> false
+        }
+    }
+
     @StringRes
     fun getCategoryLabel(category: ActionCategory): Int =
         when (category) {

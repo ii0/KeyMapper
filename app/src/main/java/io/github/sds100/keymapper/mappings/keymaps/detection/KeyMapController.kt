@@ -5,13 +5,13 @@ import androidx.collection.SparseArrayCompat
 import androidx.collection.keyIterator
 import androidx.collection.valueIterator
 import io.github.sds100.keymapper.actions.ActionData
+import io.github.sds100.keymapper.actions.ActionUtils
 import io.github.sds100.keymapper.actions.PerformActionsUseCase
 import io.github.sds100.keymapper.actions.RepeatMode
 import io.github.sds100.keymapper.constraints.ConstraintSnapshot
 import io.github.sds100.keymapper.constraints.ConstraintState
 import io.github.sds100.keymapper.constraints.DetectConstraintsUseCase
 import io.github.sds100.keymapper.data.PreferenceDefaults
-import io.github.sds100.keymapper.data.entities.ActionEntity
 import io.github.sds100.keymapper.mappings.ClickType
 import io.github.sds100.keymapper.mappings.keymaps.KeyMap
 import io.github.sds100.keymapper.mappings.keymaps.KeyMapAction
@@ -32,30 +32,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import splitties.bitflags.minusFlag
 import splitties.bitflags.withFlag
-import kotlin.collections.List
-import kotlin.collections.MutableList
-import kotlin.collections.Set
-import kotlin.collections.all
-import kotlin.collections.any
-import kotlin.collections.flatMap
-import kotlin.collections.forEach
-import kotlin.collections.forEachIndexed
-import kotlin.collections.getOrNull
-import kotlin.collections.indices
-import kotlin.collections.isNotEmpty
-import kotlin.collections.last
-import kotlin.collections.lastIndex
-import kotlin.collections.listOf
-import kotlin.collections.map
-import kotlin.collections.maxOrNull
-import kotlin.collections.mutableListOf
-import kotlin.collections.mutableMapOf
-import kotlin.collections.mutableSetOf
 import kotlin.collections.set
-import kotlin.collections.toIntArray
-import kotlin.collections.toSet
-import kotlin.collections.toTypedArray
-import kotlin.collections.withIndex
 
 /**
  * Created by sds100 on 05/05/2020.
@@ -679,7 +656,7 @@ class KeyMapController(
 
         /* cache whether an action can be performed to avoid repeatedly checking when multiple triggers have the
         same action */
-        val canActionBePerformed = SparseArrayCompat<Result<ActionEntity>>()
+        val actionErrorCache = mutableMapOf<Int, Result<*>>()
 
         if (detectParallelTriggers) {
 
@@ -697,18 +674,62 @@ class KeyMapController(
                     }
                 }
 
+                /*
+                - must be fast if lots of the same action across key maps
+                - must ignore a trigger if any actions have an error
+                - only ignore the cache if a trigger contains an action that can affect other actions
+                 */
+
+                /*
+                This code is a bit complicated because of issue #797 and it must
+                still be low-latency if there are many key maps with the same actions.
+                 */
+
+                var ignoreActionErrorCache = false
+
+                /*  determine whether this key map contains an action, which affects
+                    the errors of other actions.
+                 */
+                val keyMapActions = mutableListOf<ActionData>()
+
                 for (actionKey in parallelTriggerActions[triggerIndex]) {
-                    if (canActionBePerformed[actionKey] == null) {
-                        val action = actionMap[actionKey] ?: continue
+                    val action = actionMap[actionKey] ?: continue
 
-                        val result = performActionsUseCase.getError(action.data)
-                        canActionBePerformed.put(actionKey, result)
+                    keyMapActions.add(action.data)
 
-                        if (result != null) {
+                    if (ActionUtils.actionAffectsOtherActionErrors(action.data)) {
+                        ignoreActionErrorCache = true
+                    }
+                }
+
+                if (ignoreActionErrorCache) {
+                    val keyMapActionErrorMap = performActionsUseCase.getErrors(keyMapActions)
+
+                    val containsError = keyMapActionErrorMap.values.any { it != null }
+
+                    if (containsError) {
+                        continue@triggerLoop
+                    }
+                } else {
+                    var keyMapActionErrorMap: Map<ActionData, Error?>? = null
+
+                    for (actionKey in parallelTriggerActions[triggerIndex]) {
+                        if (!actionErrorCache.containsKey(actionKey)) {
+                            val action = actionMap[actionKey] ?: continue
+
+                            if (keyMapActionErrorMap == null) {
+                                keyMapActionErrorMap = performActionsUseCase.getErrors(keyMapActions)
+                            }
+
+                            val result = keyMapActionErrorMap[action.data] ?: success()
+                            actionErrorCache[actionKey] = result
+
+                            if (result is Error) {
+                                continue@triggerLoop
+                            }
+                        } else if (actionErrorCache[actionKey] is Error) {
                             continue@triggerLoop
                         }
-                    } else if (canActionBePerformed.get(actionKey, null) is Error) {
-                        continue@triggerLoop
                     }
                 }
 

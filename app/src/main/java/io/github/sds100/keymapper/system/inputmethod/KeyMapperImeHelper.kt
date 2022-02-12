@@ -70,6 +70,12 @@ class KeyMapperImeHelper(private val imeAdapter: InputMethodAdapter) {
             .firstBlocking()
     }
 
+    fun isCompatibleIme(imeId: String): Boolean {
+        val imePackageName = imeId.split("/")[0]
+
+        return KEY_MAPPER_IME_PACKAGE_LIST.contains(imePackageName)
+    }
+
     private fun containsCompatibleIme(imeList: List<ImeInfo>): Boolean {
         return imeList
             .filter { it.isEnabled }

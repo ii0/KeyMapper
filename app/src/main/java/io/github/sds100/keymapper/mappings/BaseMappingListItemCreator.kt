@@ -24,7 +24,9 @@ abstract class BaseMappingListItemCreator<M : Mapping<A>, A : Action>(
     fun getActionChipList(mapping: M, showDeviceDescriptors: Boolean): List<ChipUi> = sequence {
         val midDot = getString(R.string.middot)
 
-        mapping.actionList.forEach { action ->
+        val errorMap = displayMapping.getErrors(mapping.actionList.map { it.data })
+
+        for (action in mapping.actionList) {
             val actionTitle: String = if (action.multiplier != null) {
                 "${action.multiplier}x ${actionUiHelper.getTitle(action.data, showDeviceDescriptors)}"
             } else {
@@ -57,7 +59,7 @@ abstract class BaseMappingListItemCreator<M : Mapping<A>, A : Action>(
 
             val icon: IconInfo? = actionUiHelper.getIcon(action.data)
 
-            val error: Error? = displayMapping.getError(action.data)
+            val error: Error? = errorMap[action.data]
 
             if (error == null) {
                 val chip = ChipUi.Normal(id = action.uid, text = chipText, icon = icon)

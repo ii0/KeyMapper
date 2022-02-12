@@ -452,5 +452,5 @@ interface ActionUiHelper<MAPPING : Mapping<A>, A : Action> {
     fun getTitle(action: ActionData, showDeviceDescriptors: Boolean): String
     fun getOptionLabels(mapping: MAPPING, action: A): List<String>
     fun getIcon(action: ActionData): IconInfo?
-    fun getError(action: ActionData): Error?
+    fun getErrors(actionList: List<ActionData>): Map<ActionData, Error?>
 }

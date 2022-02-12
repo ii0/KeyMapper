@@ -5,7 +5,7 @@ import io.github.sds100.keymapper.actions.PerformActionsUseCase
 import io.github.sds100.keymapper.actions.RepeatMode
 import io.github.sds100.keymapper.constraints.DetectConstraintsUseCase
 import io.github.sds100.keymapper.data.PreferenceDefaults
-import io.github.sds100.keymapper.util.*
+import io.github.sds100.keymapper.util.InputEventType
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -70,8 +70,12 @@ abstract class SimpleMappingController(
         performActionJobs[mappingId] = coroutineScope.launch {
             val repeatJobs = mutableListOf<RepeatJob>()
 
-            mapping.actionList.forEach { action ->
-                if (performActionsUseCase.getError(action.data) != null) return@forEach
+            val actionErrorMap = performActionsUseCase.getErrors(mapping.actionList.map { it.data })
+
+            for (action in mapping.actionList) {
+                if (actionErrorMap[action.data] != null) {
+                    continue
+                }
 
                 if (action.repeat && action.repeatMode != RepeatMode.TRIGGER_RELEASED) {
                     var alreadyRepeating = false

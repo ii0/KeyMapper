@@ -216,19 +216,7 @@ class PerformActionsUseCaseImpl(
             }
 
             is ActionData.SwitchKeyboard -> {
-                coroutineScope.launch {
-                    inputMethodAdapter
-                        .chooseImeWithoutUserInput(action.imeId)
-                        .onSuccess {
-                            val message = resourceProvider.getString(
-                                R.string.toast_chose_keyboard,
-                                it.label
-                            )
-                            popupMessageAdapter.showPopupMessage(message)
-                        }
-                        .showErrorMessageOnFail()
-                }
-
+                inputMethodAdapter.chooseImeWithoutUserInputBlocking(action.imeId)
                 result = null
             }
 
@@ -734,8 +722,8 @@ class PerformActionsUseCaseImpl(
         result?.showErrorMessageOnFail()
     }
 
-    override fun getError(action: ActionData): Error? {
-        return getActionError.getError(action)
+    override fun getErrors(actionList: List<ActionData>): Map<ActionData, Error?> {
+        return getActionError.getErrors(actionList)
     }
 
     override val defaultRepeatDelay: Flow<Long> =
@@ -827,5 +815,5 @@ interface PerformActionsUseCase {
         keyMetaState: Int = 0
     )
 
-    fun getError(action: ActionData): Error?
+    fun getErrors(actionList: List<ActionData>): Map<ActionData, Error?>
 }

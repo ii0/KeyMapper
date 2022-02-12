@@ -14,6 +14,7 @@ interface InputMethodAdapter {
     fun enableIme(imeId: String): Result<*>
 
     suspend fun chooseImeWithoutUserInput(imeId: String): Result<ImeInfo>
+    fun chooseImeWithoutUserInputBlocking(imeId: String)
 
     fun getInfoById(imeId: String): Result<ImeInfo>
     fun getInfoByPackageName(packageName: String): Result<ImeInfo>

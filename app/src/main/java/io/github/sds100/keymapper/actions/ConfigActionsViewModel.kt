@@ -87,20 +87,20 @@ class ConfigActionsViewModel<A : Action, M : Mapping<A>> constructor(
 
     fun onAddActionClick() {
         coroutineScope.launch {
-            val actionData = navigate("add_action", NavDestination.ChooseAction) ?: return@launch
-
-            val showInstallShizukuPrompt = onboardingUseCase.showInstallShizukuPrompt(actionData)
-            val showInstallGuiKeyboardPrompt =
-                onboardingUseCase.showInstallGuiKeyboardPrompt(actionData)
-
-            when {
-                showInstallShizukuPrompt && showInstallGuiKeyboardPrompt ->
-                    promptToInstallShizukuOrGuiKeyboard()
-
-                showInstallGuiKeyboardPrompt -> promptToInstallGuiKeyboard()
-            }
-
-            config.addAction(actionData)
+//            val actionData = navigate("add_action", NavDestination.ChooseAction) ?: return@launch
+//
+//            val showInstallShizukuPrompt = onboardingUseCase.showInstallShizukuPrompt(actionData)
+//            val showInstallGuiKeyboardPrompt =
+//                onboardingUseCase.showInstallGuiKeyboardPrompt(actionData)
+//
+//            when {
+//                showInstallShizukuPrompt && showInstallGuiKeyboardPrompt ->
+//                    promptToInstallShizukuOrGuiKeyboard()
+//
+//                showInstallGuiKeyboardPrompt -> promptToInstallGuiKeyboard()
+//            }
+//
+//            config.addAction(actionData)
         }
     }
 

@@ -22,9 +22,9 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.annotation.RootNavGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.result.NavResult
+import com.ramcosta.composedestinations.result.ResultBackNavigator
 import com.ramcosta.composedestinations.result.ResultRecipient
 import io.github.sds100.keymapper.R
 import io.github.sds100.keymapper.actions.sound.ChooseSoundResult
@@ -41,21 +41,19 @@ import io.github.sds100.keymapper.system.volume.VolumeStream
 import io.github.sds100.keymapper.system.volume.VolumeStreamUtils
 import io.github.sds100.keymapper.util.ui.*
 
-@RootNavGraph(start = true)
 @Destination
 @Composable
 fun ChooseActionScreen(
     viewModel: ChooseActionViewModel2,
     navigator: DestinationsNavigator,
+    resultBackNavigator: ResultBackNavigator<ActionData>,
     keyCodeResultRecipient: ResultRecipient<ChooseKeyCodeScreenDestination, Int>,
     appResultRecipient: ResultRecipient<ChooseAppScreenDestination, String>,
     appShortcutResultRecipient: ResultRecipient<ChooseAppShortcutScreenDestination, ChooseAppShortcutResult>,
     tapScreenActionResultRecipient: ResultRecipient<CreateTapScreenActionScreenDestination, PickCoordinateResult>,
     chooseSoundResultRecipient: ResultRecipient<ChooseSoundScreenDestination, ChooseSoundResult>,
     configKeyEventResultRecipient: ResultRecipient<ConfigKeyEventScreenDestination, ActionData.InputKeyEvent>,
-    configIntentResultRecipient: ResultRecipient<ConfigIntentScreenDestination, ConfigIntentResult>,
-    setResult: (ActionData) -> Unit,
-    navigateBack: () -> Unit
+    configIntentResultRecipient: ResultRecipient<ConfigIntentScreenDestination, ConfigIntentResult>
 ) {
     keyCodeResultRecipient.onNavResult { result ->
         when (result) {
@@ -143,8 +141,13 @@ fun ChooseActionScreen(
 
     ChooseActionScreen(
         viewModel = viewModel,
-        setResult = setResult,
-        navigateBack = navigateBack,
+        navigateBack = { result ->
+            if (result == null) {
+                resultBackNavigator.navigateBack()
+            } else {
+                resultBackNavigator.navigateBack(result)
+            }
+        },
         navigateToChooseKeyCode = {
             viewModel.onNavigateToConfigScreen()
             navigator.navigate(ChooseKeyCodeScreenDestination)
@@ -231,8 +234,7 @@ private fun ChooseActionScreenPreview_Searching() {
 private fun ChooseActionScreen(
     modifier: Modifier = Modifier,
     viewModel: ChooseActionViewModel2,
-    setResult: (ActionData) -> Unit,
-    navigateBack: () -> Unit,
+    navigateBack: (result: ActionData?) -> Unit,
     navigateToChooseKeyCode: () -> Unit,
     navigateToChooseApp: () -> Unit,
     navigateToChooseAppShortcut: () -> Unit,
@@ -252,8 +254,7 @@ private fun ChooseActionScreen(
                 text = { Text(configActionState.warning) },
                 confirmButton = {
                     TextButton(onClick = {
-                        navigateBack()
-                        setResult(configActionState.action)
+                        navigateBack(configActionState.action)
                     }) {
                         Text(stringResource(R.string.pos_ok))
                     }
@@ -264,8 +265,7 @@ private fun ChooseActionScreen(
                     }
                 })
         } else {
-            navigateBack()
-            setResult(configActionState.action)
+            navigateBack(configActionState.action)
         }
     }
 
@@ -296,7 +296,7 @@ private fun ChooseActionScreen(
         dialogState = dialogState,
         onDismissConfiguringAction = viewModel::dismissConfiguringAction,
         onActionClick = viewModel::onActionClick,
-        onBack = navigateBack,
+        onBack = { navigateBack(null) },
         onChooseInputMethod = viewModel::onChooseInputMethod,
         onCreateTextAction = viewModel::onCreateTextAction,
         onCreateUrlAction = viewModel::onCreateUrlAction,

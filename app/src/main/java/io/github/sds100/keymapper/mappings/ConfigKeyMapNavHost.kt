@@ -1,100 +1,93 @@
-package io.github.sds100.keymapper.actions
+package io.github.sds100.keymapper.mappings
 
-import android.os.Bundle
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.core.os.bundleOf
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
+import com.ramcosta.composedestinations.DestinationsNavHost
+import com.ramcosta.composedestinations.manualcomposablecalls.composable
 import com.ramcosta.composedestinations.scope.resultBackNavigator
 import com.ramcosta.composedestinations.scope.resultRecipient
-import com.ramcosta.composedestinations.utils.composable
+import io.github.sds100.keymapper.NavGraphs
+import io.github.sds100.keymapper.actions.ChooseActionScreen
 import io.github.sds100.keymapper.actions.keyevent.ChooseKeyCodeScreen
 import io.github.sds100.keymapper.actions.keyevent.ConfigKeyEventScreen
 import io.github.sds100.keymapper.actions.sound.ChooseSoundScreen
 import io.github.sds100.keymapper.actions.tapscreen.CreateTapScreenActionScreen
 import io.github.sds100.keymapper.destinations.*
+import io.github.sds100.keymapper.mappings.keymaps.ConfigKeyMapScreen
 import io.github.sds100.keymapper.system.apps.ChooseActivityScreen
 import io.github.sds100.keymapper.system.apps.ChooseAppScreen
 import io.github.sds100.keymapper.system.apps.ChooseAppShortcutScreen
 import io.github.sds100.keymapper.system.intents.ConfigIntentScreen
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
-
-/**
- * Created by sds100 on 12/07/2022.
- */
 
 @Composable
-fun ActionsNavHost(
+fun ConfigKeyMapNavHost(
     modifier: Modifier = Modifier,
-    startDestination: String,
-    navHostController: NavHostController,
-    setResult: (result: Bundle) -> Unit,
-    navigateBack: () -> Unit
+    navigateBack: () -> Unit,
+    keyMapUid: String?
 ) {
-    NavHost(
-        navHostController,
-        startDestination = startDestination,
-        modifier = modifier
-    ) {
+    DestinationsNavHost(modifier = modifier, navGraph = NavGraphs.root) {
+        composable(ConfigKeyMapScreenDestination) {
+            ConfigKeyMapScreen(
+                triggerViewModel = hiltViewModel()
+            )
+        }
+
         composable(ChooseActionScreenDestination) {
             ChooseActionScreen(
                 viewModel = hiltViewModel(),
-                navigator = destinationsNavigator(navHostController),
+                navigator = destinationsNavigator,
+                resultBackNavigator = resultBackNavigator(),
                 keyCodeResultRecipient = resultRecipient(),
                 appResultRecipient = resultRecipient(),
                 appShortcutResultRecipient = resultRecipient(),
                 tapScreenActionResultRecipient = resultRecipient(),
                 chooseSoundResultRecipient = resultRecipient(),
                 configKeyEventResultRecipient = resultRecipient(),
-                configIntentResultRecipient = resultRecipient(),
-                setResult = { setResult(bundleOf(ActionsFragment.EXTRA_ACTION to Json.encodeToString(it))) },
-                navigateBack = navigateBack
+                configIntentResultRecipient = resultRecipient()
             )
         }
 
         composable(ChooseKeyCodeScreenDestination) {
             ChooseKeyCodeScreen(
                 viewModel = hiltViewModel(),
-                resultNavigator = resultBackNavigator(navHostController)
+                resultNavigator = resultBackNavigator()
             )
         }
 
         composable(ChooseAppScreenDestination) {
             ChooseAppScreen(
                 viewModel = hiltViewModel(),
-                resultBackNavigator = resultBackNavigator(navHostController)
+                resultBackNavigator = resultBackNavigator()
             )
         }
 
         composable(ChooseAppShortcutScreenDestination) {
             ChooseAppShortcutScreen(
                 viewModel = hiltViewModel(),
-                resultBackNavigator = resultBackNavigator(navHostController)
+                resultBackNavigator = resultBackNavigator()
             )
         }
 
         composable(CreateTapScreenActionScreenDestination) {
             CreateTapScreenActionScreen(
                 viewModel = hiltViewModel(),
-                resultBackNavigator = resultBackNavigator(navHostController)
+                resultBackNavigator = resultBackNavigator()
             )
         }
 
         composable(ChooseSoundScreenDestination) {
             ChooseSoundScreen(
                 viewModel = hiltViewModel(),
-                resultBackNavigator = resultBackNavigator(navHostController)
+                resultBackNavigator = resultBackNavigator()
             )
         }
 
         composable(ConfigKeyEventScreenDestination) {
             ConfigKeyEventScreen(
                 viewModel = hiltViewModel(),
-                resultBackNavigator = resultBackNavigator(navHostController),
-                navigator = destinationsNavigator(navHostController),
+                resultBackNavigator = resultBackNavigator(),
+                navigator = destinationsNavigator,
                 keyCodeResultRecipient = resultRecipient()
             )
         }
@@ -102,8 +95,8 @@ fun ActionsNavHost(
         composable(ConfigIntentScreenDestination) {
             ConfigIntentScreen(
                 viewModel = hiltViewModel(),
-                resultBackNavigator = resultBackNavigator(navHostController),
-                navigator = destinationsNavigator(navHostController),
+                resultBackNavigator = resultBackNavigator(),
+                navigator = destinationsNavigator,
                 activityResultRecipient = resultRecipient()
             )
         }
@@ -111,7 +104,8 @@ fun ActionsNavHost(
         composable(ChooseActivityScreenDestination) {
             ChooseActivityScreen(
                 viewModel = hiltViewModel(),
-                resultBackNavigator = resultBackNavigator(navHostController))
+                resultBackNavigator = resultBackNavigator()
+            )
         }
     }
 }

@@ -5,7 +5,8 @@ import io.github.sds100.keymapper.mappings.Mapping
 import io.github.sds100.keymapper.mappings.OptionsUiState
 import io.github.sds100.keymapper.mappings.OptionsViewModel
 import io.github.sds100.keymapper.util.State
-import io.github.sds100.keymapper.util.ui.*
+import io.github.sds100.keymapper.util.ui.ListItem
+import io.github.sds100.keymapper.util.ui.ResourceProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
@@ -80,12 +81,12 @@ abstract class EditActionViewModel<M : Mapping<A>, A : Action>(
 
     fun onReplaceActionClick() {
         coroutineScope.launch {
-            val actionUid = actionUid.value ?: return@launch
-
-            val newActionData =
-                navigate("replace_action", NavDestination.ChooseAction) ?: return@launch
-
-            configUseCase.setActionData(actionUid, newActionData)
+//            val actionUid = actionUid.value ?: return@launch
+//
+//            val newActionData =
+//                navigate("replace_action", NavDestination.ChooseAction) ?: return@launch
+//
+//            configUseCase.setActionData(actionUid, newActionData)
         }
     }
 

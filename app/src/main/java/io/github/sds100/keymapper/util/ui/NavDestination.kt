@@ -24,7 +24,6 @@ sealed class NavDestination<R> {
         const val ID_CONFIG_INTENT = "config_intent"
         const val ID_CHOOSE_ACTIVITY = "choose_activity"
         const val ID_CHOOSE_SOUND = "choose_sound"
-        const val ID_CHOOSE_ACTION = "choose_action"
         const val ID_CHOOSE_CONSTRAINT = "choose_constraint"
         const val ID_CHOOSE_BLUETOOTH_DEVICE = "choose_bluetooth_device"
         const val ID_REPORT_BUG = "report_bug"
@@ -44,7 +43,6 @@ sealed class NavDestination<R> {
                 is ConfigIntent -> ID_CONFIG_INTENT
                 ChooseActivity -> ID_CHOOSE_ACTIVITY
                 ChooseSound -> ID_CHOOSE_SOUND
-                ChooseAction -> ID_CHOOSE_ACTION
                 is ChooseConstraint -> ID_CHOOSE_CONSTRAINT
                 ChooseBluetoothDevice -> ID_CHOOSE_BLUETOOTH_DEVICE
                 FixAppKilling -> ID_FIX_APP_KILLING
@@ -77,7 +75,6 @@ sealed class NavDestination<R> {
 
     object ChooseActivity : NavDestination<ActivityInfo>()
     object ChooseSound : NavDestination<ChooseSoundResult>()
-    object ChooseAction : NavDestination<ActionData>()
     data class ChooseConstraint(val supportedConstraints: List<ChooseConstraintType>) :
         NavDestination<Constraint>()
 

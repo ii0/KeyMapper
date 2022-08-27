@@ -1,4 +1,4 @@
-package io.github.sds100.keymapper.actions
+package io.github.sds100.keymapper.mappings.keymaps
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -6,29 +6,24 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.setFragmentResult
-import androidx.navigation.compose.rememberNavController
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.composethemeadapter3.Mdc3Theme
 import dagger.hilt.android.AndroidEntryPoint
 import io.github.sds100.keymapper.databinding.FragmentComposeViewBinding
+import io.github.sds100.keymapper.mappings.ConfigKeyMapNavHost
 
 /**
  * Created by sds100 on 12/07/2022.
  */
 @AndroidEntryPoint
-class ActionsFragment : Fragment() {
-
-    companion object {
-        const val EXTRA_ACTION = "extra_action"
-    }
+class ConfigKeyMapFragment2 : Fragment() {
 
     private var _binding: FragmentComposeViewBinding? = null
     private val binding: FragmentComposeViewBinding
         get() = _binding!!
 
-    private val args: ActionsFragmentArgs by navArgs()
+    private val args: ConfigKeyMapFragment2Args by navArgs()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -40,13 +35,9 @@ class ActionsFragment : Fragment() {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
                 Mdc3Theme {
-                    ActionsNavHost(
-                        navHostController = rememberNavController(),
-                        setResult = { result ->
-                            setFragmentResult(args.requestKey, result)
-                        },
-                        startDestination = args.destination,
+                    ConfigKeyMapNavHost(
                         navigateBack = { findNavController().navigateUp() },
+                        keyMapUid = args.keyMapUid
                     )
                 }
             }

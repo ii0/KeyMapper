@@ -123,7 +123,7 @@
     <string name="config_intent_screen_action_label">Działanie</string>
     <string name="config_intent_screen_category_header">Kategorie</string>
     <string name="config_intent_screen_data_header">Dane</string>
-    <string name="config_intent_screen_pa.ckage_header">Pakiet</string>
+    <string name="config_intent_screen_package_header">Pakiet</string>
     <string name="config_intent_screen_class_header">Klasa</string>
     <string name="hint_intent_extra_name">Nazwa</string>
     <string name="hint_intent_extra_value_with_type">Wartość (%s)</string>

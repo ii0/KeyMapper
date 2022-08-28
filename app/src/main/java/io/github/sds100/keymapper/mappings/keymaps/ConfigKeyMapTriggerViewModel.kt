@@ -53,7 +53,7 @@ class ConfigKeyMapTriggerViewModel constructor(
                 R.string.button_recording_trigger_countdown,
                 recordTriggerState.timeLeft
             )
-            RecordTriggerState.Stopped -> getString(R.string.button_record_trigger)
+            RecordTriggerState.Stopped -> getString(R.string.config_trigger_button_record)
         }
     }.flowOn(dispatchers.default()).stateIn(coroutineScope, SharingStarted.Lazily, "")
 

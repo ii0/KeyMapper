@@ -7,7 +7,6 @@
     <string name="enable">Włącz</string>
     <string name="open">Otwórz</string>
     <string name="recyclerview_placeholder">¯\\_(ツ)_/¯\n\nNic tu nie ma!</string>
-    <string name="triggers_recyclerview_placeholder">Wprowadź wyzwalacz!</string>
     <string name="actions_recyclerview_placeholder">Dodaj działanie!</string>
     <string name="keymap_recyclerview_placeholder">¯\\_(ツ)_/¯\n\nUtwórz mapę klawiszy!</string>
     <string name="action_shortcut_list_recyclerview_placeholder">¯\\_(ツ)_/¯\n\nNie wybrano żadnych działań dla tego skrótu!</string>
@@ -61,8 +60,6 @@
             Wprowadzenie tego kodu klawisza będzie działać tylko wtedy, gdy używasz klawiatury kompatybilnej z Key Mapper.</string>
     <string name="caption_action_type_keycode">UWAGA!
             Wprowadzenie tego kodu klawisza będzie działać tylko wtedy, gdy używasz klawiatury kompatybilnej z Key Mapper.</string>
-    <string name="caption_action_type_sound">Plik dźwiękowy zostanie skopiowany do prywatnego folderu danych Key Mapper, co oznacza, że Twoje działania będą nadal działać, nawet jeśli plik zostanie przeniesiony lub usunięty. Kopia zapasowa zostanie utworzona wraz z mapami klawiszy w folderze zip.
-    Zapisane pliki dźwiękowe można usunąć w ustawieniach.</string>
     <string name="caption_action_type_text">Wpisz tekst, który należy wkleić podczas wykonywania tego działania.</string>
     <string name="caption_action_type_phone_call">Wprowadź numer telefonu.</string>
     <string name="caption_action_type_url">Wpisz adres URL, który chcesz otworzyć. http://, https:// lub www. nie jest wymagane.</string>
@@ -322,7 +319,7 @@
     <!-- Menu action titles-->
     <!-- Button titles -->
     <string name="button_add_action">Dodaj działanie</string>
-    <string name="button_record_trigger">Wprowadź wyzwalacz</string>
+    <string name="config_trigger_button_record">Wprowadź wyzwalacz</string>
     <string name="button_done">Gotowe</string>
     <string name="button_save">Zapisz</string>
     <string name="button_fix">Napraw</string>
@@ -1024,7 +1021,6 @@
     <string name="intent_type_float_array_example">Rozdzielana przecinkami lista prawidłowych liczb Float w języku programowania Java, np. 1241.123</string>
     <string name="intent_type_short_example">Poprawna liczba Short w języku programowania Java, np. 2342</string>
     <string name="intent_type_short_array_example">Rozdzielana przecinkami lista prawidłowych liczb Short w języku programowania Java, np. 3242,12354</string>
-    <string name="config_intent_screen_flags_help_dialog_text">Flagi Intencji są przechowywane jako flagi bitowe. Te flagi zmieniają sposób obsługi Intencji. Jeśli to pole jest puste dla Intencji aktywności, Key Mapper domyślnie użyje FLAG_ACTIVITY_NEW_TASK. Aby uzyskać bardziej szczegółowe informacje, kliknij przycisk \"Dokumentacja\", aby zapoznać się z dokumentacją dla programistów Androida.</string>
     <!--  Intent action type strings  -->
     <!--  Tap targets  -->
     <string name="tap_target_quick_start_guide_primary">Przewodnik szybkiego startu</string>

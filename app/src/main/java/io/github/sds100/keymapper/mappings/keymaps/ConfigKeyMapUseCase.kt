@@ -20,10 +20,12 @@ import io.github.sds100.keymapper.util.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * Created by sds100 on 16/02/2021.
  */
+@Singleton
 class ConfigKeyMapUseCaseImpl @Inject constructor(
     private val keyMapRepository: KeyMapRepository,
     private val devicesAdapter: DevicesAdapter,

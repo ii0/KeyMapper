@@ -10,7 +10,7 @@ import kotlinx.coroutines.Job
 @Composable
 fun rememberDragDropListState(
     lazyListState: LazyListState = rememberLazyListState(),
-    onMove: (Int, Int) -> Unit
+    onMove: (from: Int, to: Int) -> Unit,
 ): DragDropListState {
     return remember { DragDropListState(lazyListState = lazyListState, onMove = onMove) }
 }

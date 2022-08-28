@@ -71,7 +71,7 @@
                 android:layout_marginTop="16dp"
                 android:layout_marginEnd="16dp"
                 android:layout_marginBottom="16dp"
-                android:text="@string/triggers_recyclerview_placeholder" />
+                android:text="@string/config_trigger_empty_text" />
         </FrameLayout>
 
         <RadioGroup
@@ -181,7 +181,7 @@
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintHorizontal_chainStyle="spread_inside"
             app:layout_constraintStart_toStartOf="parent"
-            tools:text="@string/button_record_trigger" />
+            tools:text="@string/config_trigger_button_record" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

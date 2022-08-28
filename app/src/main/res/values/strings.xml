@@ -11,7 +11,6 @@
     <string name="open">Open</string>
     <string name="shrug" translatable="false">¯\\_(ツ)_/¯</string>
     <string name="recyclerview_placeholder">¯\\_(ツ)_/¯\n\nNothing here!</string>
-    <string name="triggers_recyclerview_placeholder">Record a trigger!</string>
     <string name="actions_recyclerview_placeholder">Add an action!</string>
     <string name="keymap_recyclerview_placeholder">¯\\_(ツ)_/¯\n\nCreate a key map!</string>
     <string name="action_shortcut_list_recyclerview_placeholder">¯\\_(ツ)_/¯\n\nYou haven\'t chosen any actions for this shortcut!</string>
@@ -407,7 +406,6 @@
 
     <!-- Button titles -->
     <string name="button_add_action">Add action</string>
-    <string name="button_record_trigger">Record trigger</string>
     <string name="button_done">Done</string>
     <string name="button_save">Save</string>
     <string name="button_fix">Fix</string>
@@ -556,7 +554,7 @@
     <string name="pos_join">Join</string>
     <string name="pos_change_location">Change</string>
     <string name="pos_turn_off_stock_battery_optimisation">Fix partially</string>
-    <string name="pos_ok">Ok</string>
+    <string name="pos_ok">OK</string>
     <string name="pos_turn_on">Turn on</string>
     <string name="pos_restart">Restart</string>
     <string name="pos_never_show_again">Never show again</string>
@@ -1390,7 +1388,7 @@
     <string name="config_intent_screen_category_exists_error">This category already exists!</string>
     <string name="config_intent_screen_category_name_label">Category name</string>
     <string name="config_intent_screen_category_header">Categories</string>
-    
+
     <string name="config_intent_screen_extras_header">Extras</string>
     <string name="config_intent_screen_add_extra_button">Add extra</string>
     <string name="config_intent_screen_add_extra_dialog_title">Add extra</string>
@@ -1456,4 +1454,16 @@
     <string name="config_intent_screen_flags_not_a_number_error">Must be an integer!</string>
     <string name="config_intent_screen_choose_flags_dialog_title">Choose flags</string>
     <!-- Config intent screen -->
+
+    <!-- Config key map screen -->
+    <string name="config_key_map_help_content_description">Help</string>
+    <!-- Config key map screen -->
+
+    <!-- Config trigger screen -->
+    <string name="config_trigger_remove_key_content_description">Remove trigger key</string>
+    <string name="config_trigger_key_options_content_description">Configure more options for key</string>
+    <string name="config_trigger_key_devices_content_description">Choose a device for key</string>
+    <string name="config_trigger_button_record">Record trigger</string>
+    <string name="config_trigger_empty_text">Tap \'record trigger\' and press the buttons that you want to remap.\n\nTap the help (?) button to learn more.</string>
+    <!-- Config trigger screen -->
 </resources>

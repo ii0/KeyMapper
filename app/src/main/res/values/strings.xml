@@ -409,7 +409,6 @@
     <string name="button_done">Done</string>
     <string name="button_save">Save</string>
     <string name="button_fix">Fix</string>
-    <string name="button_recording_trigger_countdown">%d…</string>
     <string name="button_add_constraint">Add constraint</string>
     <string name="button_choose_keycode">Choose Key code</string>
     <string name="button_yes">Yes!</string>
@@ -1457,13 +1456,15 @@
     <string name="config_key_map_back_content_description">Cancel editing key map</string>
     <string name="config_key_map_discard_changes_dialog_title">Discard your changes</string>
     <string name="config_key_map_discard_changes_dialog_message">Are you sure you want to discard your changes?</string>
+    <string name="config_key_map_save_button">Save</string>
     <!-- Config key map screen -->
 
     <!-- Config trigger screen -->
     <string name="config_trigger_remove_key_content_description">Remove trigger key</string>
     <string name="config_trigger_key_options_content_description">Configure more options for key</string>
     <string name="config_trigger_key_devices_content_description">Choose a device for key</string>
-    <string name="config_trigger_button_record">Record trigger</string>
+    <string name="config_trigger_record_button">Record trigger</string>
     <string name="config_trigger_empty_text">Tap \'record trigger\' and press the buttons that you want to remap.\n\nTap the help (?) button to learn more.</string>
+    <string name="config_trigger_record_countdown_button_text">%d…</string>
     <!-- Config trigger screen -->
 </resources>

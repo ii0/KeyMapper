@@ -181,7 +181,7 @@
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintHorizontal_chainStyle="spread_inside"
             app:layout_constraintStart_toStartOf="parent"
-            tools:text="@string/config_trigger_button_record" />
+            tools:text="@string/config_trigger_record_button" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

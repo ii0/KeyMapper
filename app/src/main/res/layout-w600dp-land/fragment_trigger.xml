@@ -181,7 +181,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@id/recyclerViewError"
-            tools:text="@string/config_trigger_button_record" />
+            tools:text="@string/config_trigger_record_button" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

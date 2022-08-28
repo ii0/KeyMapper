@@ -7,6 +7,7 @@ import io.github.sds100.keymapper.R
 import io.github.sds100.keymapper.mappings.ClickType
 import io.github.sds100.keymapper.mappings.keymaps.ConfigKeyMapUseCase
 import io.github.sds100.keymapper.mappings.keymaps.DisplayKeyMapUseCase
+import io.github.sds100.keymapper.mappings.keymaps.KeyMap
 import io.github.sds100.keymapper.system.devices.InputDeviceUtils
 import io.github.sds100.keymapper.system.keyevents.KeyEventUtils
 import io.github.sds100.keymapper.util.State
@@ -17,26 +18,27 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class ConfigTriggerViewModel @Inject constructor(
+class ConfigKeyMapViewModel2 @Inject constructor(
     private val configUseCase: ConfigKeyMapUseCase,
     private val displayUseCase: DisplayKeyMapUseCase,
     private val recordTriggerUseCase: RecordTriggerUseCase,
     private val resourceProvider: ResourceProvider,
 ) : ViewModel() {
-    val state: StateFlow<ConfigTriggerState> = configUseCase.mapping
+    private val recordTriggerState: StateFlow<RecordTriggerState> = recordTriggerUseCase.state
+        .stateIn(viewModelScope, SharingStarted.Lazily, RecordTriggerState.Stopped)
+
+    private val keyMapFlow: Flow<KeyMap> = configUseCase.mapping
         .dropWhile { it !is State.Data }
         .map { (it as State.Data).data }
-        .map { keyMap ->
-            if (keyMap.trigger.keys.isEmpty()) {
-                ConfigTriggerState.Empty
-            } else {
-                ConfigTriggerState.Trigger(
-                    keys = buildKeyListItems(keyMap.trigger)
-                )
-            }
-        }
+
+    val state: StateFlow<ConfigTriggerState> = combine(keyMapFlow, recordTriggerState) { keyMap, recordState ->
+        ConfigTriggerState(
+            keys = buildKeyListItems(keyMap.trigger),
+            recordTriggerState = recordState
+        )
+    }
         .flowOn(Dispatchers.Default)
-        .stateIn(viewModelScope, SharingStarted.Lazily, ConfigTriggerState.Empty)
+        .stateIn(viewModelScope, SharingStarted.Lazily, ConfigTriggerState())
 
     private val showDeviceDescriptors: StateFlow<Boolean> = displayUseCase.showDeviceDescriptors
         .stateIn(viewModelScope, SharingStarted.Lazily, false)
@@ -51,8 +53,9 @@ class ConfigTriggerViewModel @Inject constructor(
 
     private val midDotString: String by lazy { resourceProvider.getString(R.string.middot) }
 
-    private val recordTriggerState: StateFlow<RecordTriggerState> = recordTriggerUseCase.state
-        .stateIn(viewModelScope, SharingStarted.Lazily, RecordTriggerState.Stopped)
+    fun onSaveClick() {
+        configUseCase.save()
+    }
 
     fun loadNewKeyMap() {
         configUseCase.loadNewKeyMap()
@@ -113,12 +116,13 @@ class ConfigTriggerViewModel @Inject constructor(
                 ClickType.DOUBLE_PRESS -> doublePressClickTypeString
             }
 
+            append(KeyEventUtils.keyCodeToString(key.keyCode))
+
+            append(" $midDotString ")
+
             if (clickTypeString != null) {
                 append(clickTypeString)
             }
-
-            append(" $midDotString ")
-            append(KeyEventUtils.keyCodeToString(key.keyCode))
         }
     }
 
@@ -141,7 +145,4 @@ class ConfigTriggerViewModel @Inject constructor(
     }
 }
 
-sealed class ConfigTriggerState {
-    object Empty : ConfigTriggerState()
-    data class Trigger(val keys: List<TriggerKeyListItem2>) : ConfigTriggerState()
-}
+data class ConfigTriggerState(val keys: List<TriggerKeyListItem2> = emptyList(), val recordTriggerState: RecordTriggerState = RecordTriggerState.Stopped)

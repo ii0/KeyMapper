@@ -50,10 +50,10 @@ class ConfigKeyMapTriggerViewModel constructor(
     val recordTriggerButtonText: StateFlow<String> = recordTrigger.state.map { recordTriggerState ->
         when (recordTriggerState) {
             is RecordTriggerState.CountingDown -> getString(
-                R.string.button_recording_trigger_countdown,
+                R.string.config_trigger_record_countdown_button_text,
                 recordTriggerState.timeLeft
             )
-            RecordTriggerState.Stopped -> getString(R.string.config_trigger_button_record)
+            RecordTriggerState.Stopped -> getString(R.string.config_trigger_record_button)
         }
     }.flowOn(dispatchers.default()).stateIn(coroutineScope, SharingStarted.Lazily, "")
 

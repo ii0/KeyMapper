@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.HelpOutline
+import androidx.compose.material.icons.outlined.Save
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -20,8 +21,8 @@ import com.google.accompanist.pager.rememberPagerState
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootNavGraph
 import io.github.sds100.keymapper.R
+import io.github.sds100.keymapper.mappings.keymaps.trigger.ConfigKeyMapViewModel2
 import io.github.sds100.keymapper.mappings.keymaps.trigger.ConfigTriggerScreen
-import io.github.sds100.keymapper.mappings.keymaps.trigger.ConfigTriggerViewModel
 import io.github.sds100.keymapper.util.ui.pagerTabIndicatorOffset
 import kotlinx.coroutines.launch
 
@@ -30,13 +31,24 @@ import kotlinx.coroutines.launch
 @Composable
 fun ConfigKeyMapScreen(
     modifier: Modifier = Modifier,
-    triggerViewModel: ConfigTriggerViewModel,
+    viewModel: ConfigKeyMapViewModel2,
     navigateBack: () -> Unit,
 ) {
+    val triggerState by viewModel.state.collectAsState()
+
     ConfigKeyMapScreen(
         modifier = modifier,
         navigateBack = navigateBack,
-        triggerScreen = { ConfigTriggerScreen(triggerViewModel) }
+        triggerScreen = {
+            ConfigTriggerScreen(
+                state = triggerState,
+                onRecordTriggerClick = viewModel::onRecordTriggerClick
+            )
+        },
+        onSaveClick = {
+            viewModel.onSaveClick()
+            navigateBack()
+        }
     )
 }
 
@@ -45,7 +57,8 @@ fun ConfigKeyMapScreen(
 private fun ConfigKeyMapScreen(
     modifier: Modifier = Modifier,
     navigateBack: () -> Unit = {},
-    triggerScreen: @Composable () -> Unit,
+    triggerScreen: @Composable () -> Unit = {},
+    onSaveClick: () -> Unit = {},
 ) {
     val pagerState = rememberPagerState()
     val scope = rememberCoroutineScope()
@@ -55,7 +68,16 @@ private fun ConfigKeyMapScreen(
         BottomAppBar(actions = {
             BottomAppBarActions(navigateBack = navigateBack)
         }, floatingActionButton = {
-
+            FloatingActionButton(
+                onClick = onSaveClick,
+                elevation = FloatingActionButtonDefaults.bottomAppBarFabElevation(),
+                containerColor = BottomAppBarDefaults.bottomAppBarFabColor
+            ) {
+                Icon(
+                    Icons.Outlined.Save,
+                    contentDescription = stringResource(R.string.config_key_map_save_button)
+                )
+            }
         })
     }, topBar = {
         TabRow(selectedTabIndex = pagerState.currentPage, indicator = { tabPositions ->
@@ -122,7 +144,5 @@ private fun BottomAppBarActions(navigateBack: () -> Unit) {
 @Preview(device = Devices.PIXEL_4)
 @Composable
 private fun Preview() {
-    ConfigKeyMapScreen(
-        triggerScreen = { }
-    )
+    ConfigKeyMapScreen()
 }

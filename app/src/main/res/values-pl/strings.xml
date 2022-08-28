@@ -319,11 +319,11 @@
     <!-- Menu action titles-->
     <!-- Button titles -->
     <string name="button_add_action">Dodaj działanie</string>
-    <string name="config_trigger_button_record">Wprowadź wyzwalacz</string>
+    <string name="config_trigger_record_button">Wprowadź wyzwalacz</string>
     <string name="button_done">Gotowe</string>
     <string name="button_save">Zapisz</string>
     <string name="button_fix">Napraw</string>
-    <string name="button_recording_trigger_countdown">%d…</string>
+    <string name="config_trigger_record_countdown_button_text">%d…</string>
     <string name="button_add_constraint">Dodaj ograniczenie</string>
     <string name="button_choose_keycode">Wybierz kod klawisza</string>
     <string name="button_yes">Tak!</string>

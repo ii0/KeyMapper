@@ -5,8 +5,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,48 +24,36 @@ import io.github.sds100.keymapper.util.ui.dragdrop.rememberDragDropListState
 
 @Composable
 fun ConfigTriggerScreen(
-    viewModel: ConfigTriggerViewModel,
-) {
-    val state by viewModel.state.collectAsState()
-    ConfigTriggerScreen(
-        modifier = Modifier.fillMaxSize(),
-        state = state,
-        onRecordTriggerClick = viewModel::onRecordTriggerClick)
-}
-
-@Composable
-private fun ConfigTriggerScreen(
     modifier: Modifier = Modifier,
     state: ConfigTriggerState,
     onRecordTriggerClick: () -> Unit = {},
 ) {
     Column(modifier) {
-        when (state) {
-            ConfigTriggerState.Empty ->
-                EmptyTriggerUi(modifier = Modifier
-                    .fillMaxSize()
+        if (state.keys.isEmpty()) {
+            EmptyTriggerUi(modifier = Modifier
+                .fillMaxSize()
+                .padding(8.dp)
+                .weight(1f))
+        } else {
+            TriggerUi(
+                modifier = Modifier
                     .padding(8.dp)
-                    .weight(1f))
-
-            is ConfigTriggerState.Trigger ->
-                TriggerUi(
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .weight(1f),
-                    state = state)
+                    .weight(1f),
+                state = state)
         }
 
         RecordTriggerButton(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(8.dp),
-            onClick = onRecordTriggerClick
+            onClick = onRecordTriggerClick,
+            state = state.recordTriggerState
         )
     }
 }
 
 @Composable
-private fun TriggerUi(modifier: Modifier = Modifier, state: ConfigTriggerState.Trigger) {
+private fun TriggerUi(modifier: Modifier = Modifier, state: ConfigTriggerState) {
     Column(modifier) {
         KeyList(modifier = Modifier.weight(1f), keys = state.keys)
     }
@@ -86,7 +72,7 @@ private fun EmptyTriggerUi(modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun RecordTriggerButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
+private fun RecordTriggerButton(modifier: Modifier = Modifier, onClick: () -> Unit, state: RecordTriggerState) {
     val harmonizedRedColorInt =
         MaterialColors.harmonizeWithPrimary(LocalContext.current, Colors.recordTriggerButton.toArgb())
 
@@ -97,8 +83,13 @@ private fun RecordTriggerButton(modifier: Modifier = Modifier, onClick: () -> Un
         contentColor = Color.White
     )
 
+    val text = when (state) {
+        is RecordTriggerState.CountingDown -> stringResource(R.string.config_trigger_record_countdown_button_text, state.timeLeft)
+        RecordTriggerState.Stopped -> stringResource(R.string.config_trigger_record_button)
+    }
+
     Button(modifier = modifier, onClick = onClick, colors = buttonColors) {
-        Text(stringResource(R.string.config_trigger_button_record))
+        Text(text)
     }
 }
 
@@ -108,7 +99,11 @@ private fun KeyList(modifier: Modifier = Modifier, keys: List<TriggerKeyListItem
     val scope = rememberCoroutineScope()
 
     LazyColumn(
-        modifier = modifier.dragAndDrop(dragDropState, scope),
+        modifier = modifier.apply {
+            if (keys.size > 1) {
+                dragAndDrop(dragDropState, scope)
+            }
+        },
         state = dragDropState.lazyListState) {
 
         itemsIndexed(items = keys, key = { _, item -> item.uid }) { index, item ->
@@ -117,7 +112,7 @@ private fun KeyList(modifier: Modifier = Modifier, keys: List<TriggerKeyListItem
                     .dragAndDropItemAnimation(index, dragDropState),
                 description = item.description,
                 extraInfo = item.extraInfo,
-                linkType = TriggerKeyLinkType.ARROW)
+                linkType = item.linkType)
         }
     }
 }
@@ -129,7 +124,7 @@ private fun Preview() {
         Surface {
             ConfigTriggerScreen(
                 modifier = Modifier.fillMaxSize(),
-                state = ConfigTriggerState.Trigger(
+                state = ConfigTriggerState(
                     keys = listOf(
                         TriggerKeyListItem2(
                             uid = "1",
@@ -143,7 +138,8 @@ private fun Preview() {
                             extraInfo = "Headphones",
                             linkType = TriggerKeyLinkType.HIDDEN
                         ),
-                    )
+                    ),
+                    recordTriggerState = RecordTriggerState.Stopped
                 )
             )
         }
@@ -157,7 +153,7 @@ private fun PreviewEmpty() {
         Surface {
             ConfigTriggerScreen(
                 modifier = Modifier.fillMaxSize(),
-                state = ConfigTriggerState.Empty
+                state = ConfigTriggerState(recordTriggerState = RecordTriggerState.CountingDown(timeLeft = 3))
             )
         }
     }

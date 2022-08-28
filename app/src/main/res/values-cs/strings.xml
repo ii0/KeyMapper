@@ -310,11 +310,11 @@ Pokud by měla být spárována nějaká WiFi síť, nechte ji prázdnou.</strin
     <!-- Menu action titles-->
     <!-- Button titles -->
     <string name="button_add_action">Přidat akci</string>
-    <string name="config_trigger_button_record">Nahrát spouštěč</string>
+    <string name="config_trigger_record_button">Nahrát spouštěč</string>
     <string name="button_done">Hotovo</string>
     <string name="button_save">Uložit</string>
     <string name="button_fix">Opravit</string>
-    <string name="button_recording_trigger_countdown">%d…</string>
+    <string name="config_trigger_record_countdown_button_text">%d…</string>
     <string name="button_add_constraint">Přidat omezení</string>
     <string name="button_choose_keycode">Zvolte kód klíče</string>
     <string name="button_yes">Ano!</string>

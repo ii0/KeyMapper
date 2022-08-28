@@ -15,6 +15,7 @@ import io.github.sds100.keymapper.actions.sound.ChooseSoundScreen
 import io.github.sds100.keymapper.actions.tapscreen.CreateTapScreenActionScreen
 import io.github.sds100.keymapper.destinations.*
 import io.github.sds100.keymapper.mappings.keymaps.ConfigKeyMapScreen
+import io.github.sds100.keymapper.mappings.keymaps.trigger.ConfigTriggerViewModel
 import io.github.sds100.keymapper.system.apps.ChooseActivityScreen
 import io.github.sds100.keymapper.system.apps.ChooseAppScreen
 import io.github.sds100.keymapper.system.apps.ChooseAppShortcutScreen
@@ -24,12 +25,21 @@ import io.github.sds100.keymapper.system.intents.ConfigIntentScreen
 fun ConfigKeyMapNavHost(
     modifier: Modifier = Modifier,
     navigateBack: () -> Unit,
-    keyMapUid: String?
+    keyMapUid: String?,
 ) {
     DestinationsNavHost(modifier = modifier, navGraph = NavGraphs.root) {
         composable(ConfigKeyMapScreenDestination) {
+            val triggerViewModel: ConfigTriggerViewModel = hiltViewModel()
+
+            if (keyMapUid == null) {
+                triggerViewModel.loadNewKeyMap()
+            } else {
+                triggerViewModel.loadKeyMap(keyMapUid)
+            }
+
             ConfigKeyMapScreen(
-                triggerViewModel = hiltViewModel()
+                triggerViewModel = triggerViewModel,
+                navigateBack = navigateBack
             )
         }
 

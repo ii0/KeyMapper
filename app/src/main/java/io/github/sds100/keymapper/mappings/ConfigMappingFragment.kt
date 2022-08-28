@@ -168,8 +168,8 @@ abstract class ConfigMappingFragment : Fragment() {
     private fun showOnBackPressedWarning() {
         viewLifecycleScope.launchWhenResumed {
             onBackPressedDialog = requireContext().materialAlertDialog {
-                titleResource = R.string.dialog_title_discard_changes
-                messageResource = R.string.dialog_message_discard_changes
+                titleResource = R.string.config_key_map_discard_changes_dialog_title
+                messageResource = R.string.config_key_map_discard_changes_dialog_message
 
                 positiveButton(R.string.pos_confirm) {
                     findNavController().navigateUp()

@@ -429,7 +429,6 @@
     <!-- Button titles -->
 
     <!-- Dialog stuff -->
-    <string name="dialog_title_are_you_sure">Are you sure?</string>
     <string name="dialog_title_create_shortcut_title">Create shortcut title</string>
     <string name="dialog_title_root_prompt">Root permission needed!</string>
     <string name="dialog_title_flags">More</string>
@@ -437,8 +436,6 @@
     <string name="dialog_title_choose_flash">Choose flash</string>
     <string name="dialog_title_cant_find_accessibility_settings_page">Can\'t find the accessibility settings page</string>
     <string name="dialog_title_cant_record_trigger">Can\'t record trigger?</string>
-    <string name="dialog_title_discard_changes">Discard your changes</string>
-    <string name="dialog_message_discard_changes">Are you sure you want to discard your changes?</string>
     <string name="dialog_message_root_prompt">If you know your phone isn\'t rooted or you don\'t know what root is, you can\'t use features which only work on rooted devices. When you tap \'OK\', you will be taken to the settings.
             In the settings, scroll to the bottom and tap \'Key Mapper has root permission\' so you can use root features/actions.</string>
     <string name="dialog_message_downloading">Downloading…</string>
@@ -1457,6 +1454,9 @@
 
     <!-- Config key map screen -->
     <string name="config_key_map_help_content_description">Help</string>
+    <string name="config_key_map_back_content_description">Cancel editing key map</string>
+    <string name="config_key_map_discard_changes_dialog_title">Discard your changes</string>
+    <string name="config_key_map_discard_changes_dialog_message">Are you sure you want to discard your changes?</string>
     <!-- Config key map screen -->
 
     <!-- Config trigger screen -->

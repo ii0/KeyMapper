@@ -53,7 +53,11 @@ class ConfigTriggerViewModel @Inject constructor(
 
     private val recordTriggerState: StateFlow<RecordTriggerState> = recordTriggerUseCase.state
         .stateIn(viewModelScope, SharingStarted.Lazily, RecordTriggerState.Stopped)
-    
+
+    fun loadNewKeyMap() {
+        configUseCase.loadNewKeyMap()
+    }
+
     fun loadKeyMap(uid: String) {
         viewModelScope.launch {
             configUseCase.loadKeyMap(uid)

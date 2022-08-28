@@ -1,13 +1,14 @@
 package io.github.sds100.keymapper.mappings.keymaps
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.HelpOutline
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
@@ -24,28 +25,35 @@ import io.github.sds100.keymapper.mappings.keymaps.trigger.ConfigTriggerViewMode
 import io.github.sds100.keymapper.util.ui.pagerTabIndicatorOffset
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalPagerApi::class, ExperimentalMaterial3Api::class)
 @RootNavGraph(start = true)
 @Destination
 @Composable
 fun ConfigKeyMapScreen(
     modifier: Modifier = Modifier,
     triggerViewModel: ConfigTriggerViewModel,
+    navigateBack: () -> Unit,
+) {
+    ConfigKeyMapScreen(
+        modifier = modifier,
+        navigateBack = navigateBack,
+        triggerScreen = { ConfigTriggerScreen(triggerViewModel) }
+    )
+}
+
+@OptIn(ExperimentalPagerApi::class, ExperimentalMaterial3Api::class)
+@Composable
+private fun ConfigKeyMapScreen(
+    modifier: Modifier = Modifier,
+    navigateBack: () -> Unit = {},
+    triggerScreen: @Composable () -> Unit,
 ) {
     val pagerState = rememberPagerState()
     val scope = rememberCoroutineScope()
     val tabTitles = remember { listOf("Trigger", "Actions") }
-    val uriHandler = LocalUriHandler.current
-    
+
     Scaffold(modifier = modifier, bottomBar = {
         BottomAppBar(actions = {
-            val triggerGuideUrl = stringResource(R.string.url_trigger_guide)
-
-            IconButton(onClick = {
-                uriHandler.openUri(triggerGuideUrl)
-            }) {
-                Icon(imageVector = Icons.Outlined.HelpOutline, contentDescription = stringResource(R.string.config_key_map_help_content_description))
-            }
+            BottomAppBarActions(navigateBack = navigateBack)
         }, floatingActionButton = {
 
         })
@@ -70,19 +78,51 @@ fun ConfigKeyMapScreen(
             state = pagerState
         ) { page ->
             when (page) {
-                0 -> {
-                    ConfigTriggerScreen(triggerViewModel)
-                }
-                1 -> {
-//                    ConfigTriggerScreen(triggerViewModel)
-                }
+                0 -> triggerScreen()
             }
         }
+    }
+}
+
+@Composable
+private fun BottomAppBarActions(navigateBack: () -> Unit) {
+    var showDismissChangesDialog: Boolean by rememberSaveable { mutableStateOf(false) }
+
+    BackHandler { showDismissChangesDialog = true }
+
+    if (showDismissChangesDialog) {
+        AlertDialog(onDismissRequest = { showDismissChangesDialog = false },
+            title = { Text(stringResource(R.string.config_key_map_discard_changes_dialog_title)) },
+            text = { Text(stringResource(R.string.config_key_map_discard_changes_dialog_message)) },
+            confirmButton = {
+                TextButton(onClick = navigateBack) {
+                    Text(stringResource(R.string.pos_confirm))
+                }
+            }, dismissButton = {
+            TextButton(onClick = { showDismissChangesDialog = false }) {
+                Text(stringResource(R.string.neg_cancel))
+            }
+        })
+    }
+
+    IconButton(onClick = { showDismissChangesDialog = true }) {
+        Icon(imageVector = Icons.Outlined.ArrowBack, contentDescription = stringResource(R.string.config_key_map_back_content_description))
+    }
+
+    val uriHandler = LocalUriHandler.current
+    val triggerGuideUrl = stringResource(R.string.url_trigger_guide)
+
+    IconButton(onClick = {
+        uriHandler.openUri(triggerGuideUrl)
+    }) {
+        Icon(imageVector = Icons.Outlined.HelpOutline, contentDescription = stringResource(R.string.config_key_map_help_content_description))
     }
 }
 
 @Preview(device = Devices.PIXEL_4)
 @Composable
 private fun Preview() {
-//    ConfigKeyMapScreen()
+    ConfigKeyMapScreen(
+        triggerScreen = { }
+    )
 }

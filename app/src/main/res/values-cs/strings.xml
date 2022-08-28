@@ -332,7 +332,6 @@ Pokud by měla být spárována nějaká WiFi síť, nechte ji prázdnou.</strin
     <string name="button_replace_action">Nahradit akci</string>
     <!-- Button titles -->
     <!-- Dialog stuff -->
-    <string name="dialog_title_are_you_sure">Jste si jisti?</string>
     <string name="dialog_title_create_shortcut_title">Create shortcut title</string>
     <string name="dialog_title_root_prompt">Vyžaduje root oprávnění!</string>
     <string name="dialog_title_flags">Více</string>

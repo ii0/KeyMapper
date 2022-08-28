@@ -21,6 +21,8 @@ import com.google.accompanist.pager.rememberPagerState
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootNavGraph
 import io.github.sds100.keymapper.R
+import io.github.sds100.keymapper.mappings.keymaps.trigger.ConfigKeyMapDialog
+import io.github.sds100.keymapper.mappings.keymaps.trigger.ConfigKeyMapSnackbar
 import io.github.sds100.keymapper.mappings.keymaps.trigger.ConfigKeyMapViewModel2
 import io.github.sds100.keymapper.mappings.keymaps.trigger.ConfigTriggerScreen
 import io.github.sds100.keymapper.util.ui.pagerTabIndicatorOffset
@@ -38,18 +40,22 @@ fun ConfigKeyMapScreen(
 
     ConfigKeyMapScreen(
         modifier = modifier,
+        snackbar = viewModel.snackBar,
+        dialog = viewModel.dialog,
         navigateBack = navigateBack,
+        onSaveClick = {
+            viewModel.onSaveClick()
+            navigateBack()
+        },
+        onSnackbarClick = viewModel::onSnackBarClick,
+        onDismissDialog = viewModel::onDismissDialog,
         triggerScreen = {
             ConfigTriggerScreen(
-                state = triggerState,
+                configState = triggerState,
                 onRecordTriggerClick = viewModel::onRecordTriggerClick,
                 onRemoveTriggerKeyClick = viewModel::onRemoveTriggerKeyClick
             )
         },
-        onSaveClick = {
-            viewModel.onSaveClick()
-            navigateBack()
-        }
     )
 }
 
@@ -57,30 +63,80 @@ fun ConfigKeyMapScreen(
 @Composable
 private fun ConfigKeyMapScreen(
     modifier: Modifier = Modifier,
+    snackbar: ConfigKeyMapSnackbar,
+    dialog: ConfigKeyMapDialog,
     navigateBack: () -> Unit = {},
     triggerScreen: @Composable () -> Unit = {},
     onSaveClick: () -> Unit = {},
+    onSnackbarClick: (ConfigKeyMapSnackbar) -> Unit = {},
+    onDismissDialog: () -> Unit = {},
 ) {
     val pagerState = rememberPagerState()
     val scope = rememberCoroutineScope()
     val tabTitles = remember { listOf("Trigger", "Actions") }
+    val snackbarHostState = remember { SnackbarHostState() }
 
-    Scaffold(modifier = modifier, bottomBar = {
-        BottomAppBar(actions = {
-            BottomAppBarActions(navigateBack = navigateBack)
-        }, floatingActionButton = {
-            FloatingActionButton(
-                onClick = onSaveClick,
-                elevation = FloatingActionButtonDefaults.bottomAppBarFabElevation(),
-                containerColor = BottomAppBarDefaults.bottomAppBarFabColor
-            ) {
-                Icon(
-                    Icons.Outlined.Save,
-                    contentDescription = stringResource(R.string.config_key_map_save_button)
+    when (snackbar) {
+        ConfigKeyMapSnackbar.NONE -> {}
+        ConfigKeyMapSnackbar.ACCESSIBILITY_SERVICE_CRASHED -> {
+            val message = stringResource(R.string.error_accessibility_service_crashed)
+            val actionLabel = stringResource(R.string.pos_restart)
+            LaunchedEffect(snackbar) {
+                val result = snackbarHostState.showSnackbar(
+                    message = message,
+                    actionLabel = actionLabel,
                 )
+
+                if (result == SnackbarResult.ActionPerformed) {
+                    onSnackbarClick(snackbar)
+                }
             }
-        })
-    }, topBar = {
+        }
+
+        ConfigKeyMapSnackbar.ACCESSIBILITY_SERVICE_DISABLED -> {
+            val message = stringResource(R.string.error_accessibility_service_disabled_record_trigger)
+            val actionLabel = stringResource(R.string.enable)
+
+            LaunchedEffect(snackbar) {
+                val result = snackbarHostState.showSnackbar(
+                    message = message,
+                    actionLabel = actionLabel,
+                )
+
+                if (result == SnackbarResult.ActionPerformed) {
+                    onSnackbarClick(snackbar)
+                }
+            }
+        }
+
+    }
+
+    when (dialog) {
+        ConfigKeyMapDialog.AccessibilitySettingsNotFound -> {
+            AccessibilitySettingsNotFoundDialog(onDismiss = onDismissDialog)
+        }
+        ConfigKeyMapDialog.None -> {}
+    }
+
+    Scaffold(
+        modifier = modifier,
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+        bottomBar = {
+            BottomAppBar(actions = {
+                BottomAppBarActions(navigateBack = navigateBack)
+            }, floatingActionButton = {
+                FloatingActionButton(
+                    onClick = onSaveClick,
+                    elevation = FloatingActionButtonDefaults.bottomAppBarFabElevation(),
+                    containerColor = BottomAppBarDefaults.bottomAppBarFabColor
+                ) {
+                    Icon(
+                        Icons.Outlined.Save,
+                        contentDescription = stringResource(R.string.config_key_map_save_button)
+                    )
+                }
+            })
+        }, topBar = {
         TabRow(selectedTabIndex = pagerState.currentPage, indicator = { tabPositions ->
             TabRowDefaults.Indicator(Modifier.pagerTabIndicatorOffset(pagerState, tabPositions))
         }) {
@@ -129,7 +185,10 @@ private fun BottomAppBarActions(navigateBack: () -> Unit) {
     }
 
     IconButton(onClick = { showDismissChangesDialog = true }) {
-        Icon(imageVector = Icons.Outlined.ArrowBack, contentDescription = stringResource(R.string.config_key_map_back_content_description))
+        Icon(
+            imageVector = Icons.Outlined.ArrowBack,
+            contentDescription = stringResource(R.string.config_key_map_back_content_description)
+        )
     }
 
     val uriHandler = LocalUriHandler.current
@@ -138,12 +197,42 @@ private fun BottomAppBarActions(navigateBack: () -> Unit) {
     IconButton(onClick = {
         uriHandler.openUri(triggerGuideUrl)
     }) {
-        Icon(imageVector = Icons.Outlined.HelpOutline, contentDescription = stringResource(R.string.config_key_map_help_content_description))
+        Icon(
+            imageVector = Icons.Outlined.HelpOutline,
+            contentDescription = stringResource(R.string.config_key_map_help_content_description)
+        )
     }
+}
+
+@Composable
+private fun AccessibilitySettingsNotFoundDialog(
+    onDismiss: () -> Unit,
+) {
+    val uriHandler = LocalUriHandler.current
+    val guideUrl = stringResource(R.string.url_cant_find_accessibility_settings_issue)
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.dialog_title_cant_find_accessibility_settings_page)) },
+        text = { Text(stringResource(R.string.dialog_message_cant_find_accessibility_settings_page)) },
+        confirmButton = {
+            TextButton(onClick = { uriHandler.openUri(guideUrl) }) {
+                Text(stringResource(R.string.pos_start_service_with_adb_guide))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.neg_cancel))
+            }
+        }
+    )
 }
 
 @Preview(device = Devices.PIXEL_4)
 @Composable
 private fun Preview() {
-    ConfigKeyMapScreen()
+    ConfigKeyMapScreen(
+        snackbar = ConfigKeyMapSnackbar.ACCESSIBILITY_SERVICE_CRASHED,
+        dialog = ConfigKeyMapDialog.None
+    )
 }

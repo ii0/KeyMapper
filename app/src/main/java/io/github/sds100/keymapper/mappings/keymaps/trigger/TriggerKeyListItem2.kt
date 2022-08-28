@@ -26,6 +26,7 @@ fun TriggerKeyListItem(
     description: String,
     extraInfo: String?,
     linkType: TriggerKeyLinkType,
+    showDragHandle: Boolean = true,
     onDevicesClick: () -> Unit = {},
     onOptionsClick: () -> Unit = {},
     onRemoveClick: () -> Unit = {},
@@ -38,9 +39,11 @@ fun TriggerKeyListItem(
                     .fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(Icons.Outlined.DragHandle, contentDescription = null)
+                if (showDragHandle) {
+                    Icon(Icons.Outlined.DragHandle, contentDescription = null)
 
-                Spacer(Modifier.width(8.dp))
+                    Spacer(Modifier.width(8.dp))
+                }
 
                 Column(modifier = Modifier.weight(1f)) {
                     Text(

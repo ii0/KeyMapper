@@ -43,7 +43,6 @@ class AccessibilityServiceAdapterImpl @Inject constructor(
     override val state = MutableStateFlow(ServiceState.DISABLED)
 
     init {
-        Timber.e("init")
         //use job scheduler because there is there is a much shorter delay when the app is in the background
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             JobSchedulerHelper.observeEnabledAccessibilityServices(ctx)

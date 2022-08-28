@@ -1,5 +1,8 @@
 package io.github.sds100.keymapper.mappings.keymaps.trigger
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -10,6 +13,7 @@ import io.github.sds100.keymapper.mappings.keymaps.DisplayKeyMapUseCase
 import io.github.sds100.keymapper.mappings.keymaps.KeyMap
 import io.github.sds100.keymapper.system.devices.InputDeviceUtils
 import io.github.sds100.keymapper.system.keyevents.KeyEventUtils
+import io.github.sds100.keymapper.util.Error
 import io.github.sds100.keymapper.util.State
 import io.github.sds100.keymapper.util.ui.ResourceProvider
 import kotlinx.coroutines.Dispatchers
@@ -34,11 +38,17 @@ class ConfigKeyMapViewModel2 @Inject constructor(
     val state: StateFlow<ConfigTriggerState> = combine(keyMapFlow, recordTriggerState) { keyMap, recordState ->
         ConfigTriggerState(
             keys = buildKeyListItems(keyMap.trigger),
-            recordTriggerState = recordState
+            recordTriggerState = recordState,
+            errors = listOf(KeyMapTriggerError.DND_ACCESS_DENIED)
         )
     }
         .flowOn(Dispatchers.Default)
         .stateIn(viewModelScope, SharingStarted.Lazily, ConfigTriggerState())
+
+    var snackBar: ConfigKeyMapSnackbar by mutableStateOf(ConfigKeyMapSnackbar.NONE)
+        private set
+
+    var dialog: ConfigKeyMapDialog by mutableStateOf(ConfigKeyMapDialog.None)
 
     private val showDeviceDescriptors: StateFlow<Boolean> = displayUseCase.showDeviceDescriptors
         .stateIn(viewModelScope, SharingStarted.Lazily, false)
@@ -73,12 +83,46 @@ class ConfigKeyMapViewModel2 @Inject constructor(
         }
     }
 
+    fun onDismissDialog() {
+        dialog = ConfigKeyMapDialog.None
+    }
+
+    fun onSnackBarClick(snackBar: ConfigKeyMapSnackbar) {
+        this.snackBar = ConfigKeyMapSnackbar.NONE
+
+        when (snackBar) {
+            ConfigKeyMapSnackbar.NONE -> {}
+            ConfigKeyMapSnackbar.ACCESSIBILITY_SERVICE_CRASHED -> {
+                val success = displayUseCase.restartAccessibilityService()
+
+                if (!success) {
+                    dialog = ConfigKeyMapDialog.AccessibilitySettingsNotFound
+                }
+            }
+            ConfigKeyMapSnackbar.ACCESSIBILITY_SERVICE_DISABLED -> {
+                val success = displayUseCase.startAccessibilityService()
+
+                if (!success) {
+                    dialog = ConfigKeyMapDialog.AccessibilitySettingsNotFound
+                }
+            }
+        }
+    }
+
     fun onRecordTriggerClick() {
         viewModelScope.launch {
-            if (recordTriggerState.value is RecordTriggerState.Stopped) {
+            val result = if (recordTriggerState.value is RecordTriggerState.Stopped) {
                 recordTriggerUseCase.startRecording()
             } else {
                 recordTriggerUseCase.stopRecording()
+            }
+
+            if (result is Error.AccessibilityServiceCrashed) {
+                snackBar = ConfigKeyMapSnackbar.ACCESSIBILITY_SERVICE_CRASHED
+            } else if (result is Error.AccessibilityServiceDisabled) {
+                snackBar = ConfigKeyMapSnackbar.ACCESSIBILITY_SERVICE_DISABLED
+            } else {
+                snackBar = ConfigKeyMapSnackbar.NONE
             }
         }
     }
@@ -154,4 +198,17 @@ class ConfigKeyMapViewModel2 @Inject constructor(
     }
 }
 
-data class ConfigTriggerState(val keys: List<TriggerKeyListItem2> = emptyList(), val recordTriggerState: RecordTriggerState = RecordTriggerState.Stopped)
+sealed class ConfigKeyMapDialog {
+    object None : ConfigKeyMapDialog()
+    object AccessibilitySettingsNotFound : ConfigKeyMapDialog()
+}
+
+enum class ConfigKeyMapSnackbar {
+    NONE, ACCESSIBILITY_SERVICE_CRASHED, ACCESSIBILITY_SERVICE_DISABLED
+}
+
+data class ConfigTriggerState(
+    val keys: List<TriggerKeyListItem2> = emptyList(),
+    val recordTriggerState: RecordTriggerState = RecordTriggerState.Stopped,
+    val errors: List<KeyMapTriggerError> = emptyList(),
+)

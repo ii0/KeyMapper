@@ -17,7 +17,7 @@ fun rememberDragDropListState(
 
 class DragDropListState(
     val lazyListState: LazyListState,
-    private val onMove: (Int, Int) -> Unit
+    private val onMove: (Int, Int) -> Unit,
 ) {
     var draggedDistance by mutableStateOf(0f)
     var initiallyDraggedElement by mutableStateOf<LazyListItemInfo?>(null)
@@ -43,6 +43,10 @@ class DragDropListState(
     var overScrollJob by mutableStateOf<Job?>(null)
 
     fun onDragStart(offset: Offset) {
+        if (lazyListState.layoutInfo.totalItemsCount == 1) {
+            return
+        }
+        
         lazyListState.layoutInfo.visibleItemsInfo
             .firstOrNull { item ->
                 offset.y.toInt() in item.offset..(item.offset + item.size)
@@ -60,6 +64,10 @@ class DragDropListState(
     }
 
     fun onDrag(offset: Offset) {
+        if (lazyListState.layoutInfo.totalItemsCount == 1) {
+            return
+        }
+
         draggedDistance += offset.y
 
         initialOffsets?.let { (topOffset, bottomOffset) ->

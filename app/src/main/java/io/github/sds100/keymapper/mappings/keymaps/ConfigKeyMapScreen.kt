@@ -42,7 +42,8 @@ fun ConfigKeyMapScreen(
         triggerScreen = {
             ConfigTriggerScreen(
                 state = triggerState,
-                onRecordTriggerClick = viewModel::onRecordTriggerClick
+                onRecordTriggerClick = viewModel::onRecordTriggerClick,
+                onRemoveTriggerKeyClick = viewModel::onRemoveTriggerKeyClick
             )
         },
         onSaveClick = {

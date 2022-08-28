@@ -27,6 +27,7 @@ fun ConfigTriggerScreen(
     modifier: Modifier = Modifier,
     state: ConfigTriggerState,
     onRecordTriggerClick: () -> Unit = {},
+    onRemoveTriggerKeyClick: (String) -> Unit = {},
 ) {
     Column(modifier) {
         if (state.keys.isEmpty()) {
@@ -39,7 +40,8 @@ fun ConfigTriggerScreen(
                 modifier = Modifier
                     .padding(8.dp)
                     .weight(1f),
-                state = state)
+                state = state,
+                onRemoveTriggerKeyClick = onRemoveTriggerKeyClick)
         }
 
         RecordTriggerButton(
@@ -53,9 +55,9 @@ fun ConfigTriggerScreen(
 }
 
 @Composable
-private fun TriggerUi(modifier: Modifier = Modifier, state: ConfigTriggerState) {
+private fun TriggerUi(modifier: Modifier = Modifier, state: ConfigTriggerState, onRemoveTriggerKeyClick: (String) -> Unit) {
     Column(modifier) {
-        KeyList(modifier = Modifier.weight(1f), keys = state.keys)
+        KeyList(modifier = Modifier.weight(1f), keys = state.keys, onRemoveClick = onRemoveTriggerKeyClick)
     }
 }
 
@@ -94,25 +96,22 @@ private fun RecordTriggerButton(modifier: Modifier = Modifier, onClick: () -> Un
 }
 
 @Composable
-private fun KeyList(modifier: Modifier = Modifier, keys: List<TriggerKeyListItem2>) {
+private fun KeyList(
+    modifier: Modifier = Modifier,
+    keys: List<TriggerKeyListItem2>,
+    onRemoveClick: (String) -> Unit,
+) {
     val dragDropState = rememberDragDropListState(onMove = { from, to -> })
     val scope = rememberCoroutineScope()
 
-    LazyColumn(
-        modifier = modifier.apply {
-            if (keys.size > 1) {
-                dragAndDrop(dragDropState, scope)
-            }
-        },
-        state = dragDropState.lazyListState) {
-
+    LazyColumn(modifier = modifier.dragAndDrop(dragDropState, scope), state = dragDropState.lazyListState) {
         itemsIndexed(items = keys, key = { _, item -> item.uid }) { index, item ->
             TriggerKeyListItem(
-                modifier = Modifier
-                    .dragAndDropItemAnimation(index, dragDropState),
+                modifier = Modifier.dragAndDropItemAnimation(index, dragDropState),
                 description = item.description,
                 extraInfo = item.extraInfo,
-                linkType = item.linkType)
+                linkType = item.linkType,
+                onRemoveClick = { onRemoveClick(item.uid) })
         }
     }
 }

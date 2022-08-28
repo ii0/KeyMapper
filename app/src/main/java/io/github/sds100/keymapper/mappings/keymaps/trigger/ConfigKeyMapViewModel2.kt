@@ -53,6 +53,12 @@ class ConfigKeyMapViewModel2 @Inject constructor(
 
     private val midDotString: String by lazy { resourceProvider.getString(R.string.middot) }
 
+    init {
+        recordTriggerUseCase.onRecordKey.onEach {
+            configUseCase.addTriggerKey(it.keyCode, it.device)
+        }.launchIn(viewModelScope)
+    }
+
     fun onSaveClick() {
         configUseCase.save()
     }
@@ -75,6 +81,10 @@ class ConfigKeyMapViewModel2 @Inject constructor(
                 recordTriggerUseCase.stopRecording()
             }
         }
+    }
+
+    fun onRemoveTriggerKeyClick(uid: String) {
+        configUseCase.removeTriggerKey(uid)
     }
 
     private fun buildKeyListItems(trigger: KeyMapTrigger): List<TriggerKeyListItem2> {
@@ -118,9 +128,8 @@ class ConfigKeyMapViewModel2 @Inject constructor(
 
             append(KeyEventUtils.keyCodeToString(key.keyCode))
 
-            append(" $midDotString ")
-
             if (clickTypeString != null) {
+                append(" $midDotString ")
                 append(clickTypeString)
             }
         }

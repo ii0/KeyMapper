@@ -32,7 +32,7 @@ fun ConfigTriggerScreen(
     configState: ConfigTriggerState,
     onRecordTriggerClick: () -> Unit = {},
     onRemoveTriggerKeyClick: (String) -> Unit = {},
-    fixError: (KeyMapTriggerError) -> Unit = {},
+    onFixTriggerErrorClick: (KeyMapTriggerError) -> Unit = {},
 ) {
     Column(modifier) {
         if (configState.keys.isEmpty()) {
@@ -47,7 +47,7 @@ fun ConfigTriggerScreen(
                     .weight(1f),
                 state = configState,
                 onRemoveTriggerKeyClick = onRemoveTriggerKeyClick,
-                onFixErrorClick = fixError)
+                onFixErrorClick = onFixTriggerErrorClick)
         }
 
         RecordTriggerButton(

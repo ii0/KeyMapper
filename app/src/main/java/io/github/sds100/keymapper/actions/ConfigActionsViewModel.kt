@@ -150,7 +150,7 @@ class ConfigActionsViewModel<A : Action, M : Mapping<A>> constructor(
                 title = getString(R.string.dialog_title_install_leanback_keyboard),
                 message = getString(R.string.dialog_message_install_leanback_keyboard),
                 appStoreModel,
-                positiveButtonText = getString(R.string.pos_never_show_again),
+                positiveButtonText = getString(R.string.dialog_button_never_show_again),
                 negativeButtonText = getString(R.string.neg_cancel)
             )
 
@@ -171,7 +171,7 @@ class ConfigActionsViewModel<A : Action, M : Mapping<A>> constructor(
                 title = getString(R.string.dialog_title_install_gui_keyboard),
                 message = getString(R.string.dialog_message_install_gui_keyboard),
                 appStoreModel,
-                positiveButtonText = getString(R.string.pos_never_show_again),
+                positiveButtonText = getString(R.string.dialog_button_never_show_again),
                 negativeButtonText = getString(R.string.neg_cancel)
             )
 
@@ -218,7 +218,7 @@ class ConfigActionsViewModel<A : Action, M : Mapping<A>> constructor(
                         model = ChooseAppStoreModel(
                             githubLink = getString(R.string.url_github_keymapper_leanback_keyboard),
                         ),
-                        positiveButtonText = getString(R.string.pos_never_show_again),
+                        positiveButtonText = getString(R.string.dialog_button_never_show_again),
                         negativeButtonText = getString(R.string.neg_cancel)
                     )
 
@@ -265,7 +265,7 @@ class ConfigActionsViewModel<A : Action, M : Mapping<A>> constructor(
                             fdroidLink = getString(R.string.url_fdroid_keymapper_gui_keyboard),
                             githubLink = getString(R.string.url_github_keymapper_gui_keyboard),
                         ),
-                        positiveButtonText = getString(R.string.pos_never_show_again),
+                        positiveButtonText = getString(R.string.dialog_button_never_show_again),
                         negativeButtonText = getString(R.string.neg_cancel)
                     )
 

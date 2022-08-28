@@ -450,7 +450,7 @@
     <string name="pos_ok">OK</string>
     <string name="pos_turn_on">Włącz</string>
     <string name="pos_restart">Zrestartuj</string>
-    <string name="pos_never_show_again">Nie pokazuj ponownie</string>
+    <string name="dialog_button_never_show_again">Nie pokazuj ponownie</string>
     <string name="pos_go_to_dont_kill_my_app">Otwórz przewodnik online</string>
     <string name="neg_turn_off">Wyłącz</string>
     <string name="neg_stay_out">Nie wchodź</string>

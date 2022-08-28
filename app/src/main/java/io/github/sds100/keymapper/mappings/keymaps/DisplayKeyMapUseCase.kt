@@ -21,18 +21,18 @@ class DisplayKeyMapUseCaseImpl @Inject constructor(
     private val permissionAdapter: PermissionAdapter,
     private val inputMethodAdapter: InputMethodAdapter,
     displaySimpleMappingUseCase: DisplaySimpleMappingUseCase,
-    private val preferenceRepository: PreferenceRepository
+    private val preferenceRepository: PreferenceRepository,
 ) : DisplayKeyMapUseCase, DisplaySimpleMappingUseCase by displaySimpleMappingUseCase {
-    private companion object {
-        val keysThatRequireDndAccess = arrayOf(
-                KeyEvent.KEYCODE_VOLUME_DOWN,
-                KeyEvent.KEYCODE_VOLUME_UP
+    companion object {
+        private val keysThatRequireDndAccess = arrayOf(
+            KeyEvent.KEYCODE_VOLUME_DOWN,
+            KeyEvent.KEYCODE_VOLUME_UP
         )
     }
 
     private val keyMapperImeHelper: KeyMapperImeHelper = KeyMapperImeHelper(inputMethodAdapter)
 
-    override val invalidateTriggerErrors = merge(
+    override val invalidateTriggerErrors: Flow<Unit> = merge(
         permissionAdapter.onPermissionsUpdate,
         preferenceRepository.get(Keys.neverShowDndError).map { }.drop(1)
     )

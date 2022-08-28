@@ -1,5 +1,6 @@
 package io.github.sds100.keymapper.mappings.keymaps.trigger
 
+import android.os.Build
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -13,6 +14,7 @@ import io.github.sds100.keymapper.mappings.keymaps.DisplayKeyMapUseCase
 import io.github.sds100.keymapper.mappings.keymaps.KeyMap
 import io.github.sds100.keymapper.system.devices.InputDeviceUtils
 import io.github.sds100.keymapper.system.keyevents.KeyEventUtils
+import io.github.sds100.keymapper.system.permissions.Permission
 import io.github.sds100.keymapper.util.Error
 import io.github.sds100.keymapper.util.State
 import io.github.sds100.keymapper.util.ui.ResourceProvider
@@ -35,15 +37,25 @@ class ConfigKeyMapViewModel2 @Inject constructor(
         .dropWhile { it !is State.Data }
         .map { (it as State.Data).data }
 
-    val state: StateFlow<ConfigTriggerState> = combine(keyMapFlow, recordTriggerState) { keyMap, recordState ->
-        ConfigTriggerState(
-            keys = buildKeyListItems(keyMap.trigger),
-            recordTriggerState = recordState,
-            errors = listOf(KeyMapTriggerError.DND_ACCESS_DENIED)
-        )
-    }
-        .flowOn(Dispatchers.Default)
-        .stateIn(viewModelScope, SharingStarted.Lazily, ConfigTriggerState())
+    val isKeyMapEnabled: StateFlow<Boolean> = keyMapFlow
+        .map { it.isEnabled }
+        .stateIn(viewModelScope, SharingStarted.Lazily, false)
+
+    val triggerState: StateFlow<ConfigTriggerState> =
+        combine(keyMapFlow,
+            recordTriggerState,
+            displayUseCase.invalidateTriggerErrors.onStart { emit(Unit) }
+        ) { keyMap, recordState, _ ->
+            val triggerErrors = displayUseCase.getTriggerErrors(keyMap)
+
+            ConfigTriggerState(
+                keys = buildKeyListItems(keyMap.trigger),
+                recordTriggerState = recordState,
+                errors = triggerErrors
+            )
+        }
+            .flowOn(Dispatchers.Default)
+            .stateIn(viewModelScope, SharingStarted.Lazily, ConfigTriggerState())
 
     var snackBar: ConfigKeyMapSnackbar by mutableStateOf(ConfigKeyMapSnackbar.NONE)
         private set
@@ -82,9 +94,47 @@ class ConfigKeyMapViewModel2 @Inject constructor(
             configUseCase.loadKeyMap(uid)
         }
     }
+    
+    fun onKeyMapEnabledChange(enabled: Boolean) {
+        configUseCase.setEnabled(enabled)
+    }
 
     fun onDismissDialog() {
         dialog = ConfigKeyMapDialog.None
+    }
+
+    fun onConfirmDndAccessExplanationClick() {
+        viewModelScope.launch {
+            displayUseCase.fixError(Error.PermissionDenied(Permission.ACCESS_NOTIFICATION_POLICY))
+            dialog = ConfigKeyMapDialog.None
+        }
+    }
+
+    fun onNeverShowDndAccessErrorClick() {
+        viewModelScope.launch {
+            displayUseCase.neverShowDndTriggerErrorAgain()
+            dialog = ConfigKeyMapDialog.None
+        }
+    }
+
+    fun onFixTriggerErrorClick(error: KeyMapTriggerError) {
+        when (error) {
+            KeyMapTriggerError.DND_ACCESS_DENIED -> if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                dialog = ConfigKeyMapDialog.DndAccessExplanation
+            }
+
+            KeyMapTriggerError.SCREEN_OFF_ROOT_DENIED -> {
+                viewModelScope.launch {
+                    displayUseCase.fixError(Error.PermissionDenied(Permission.ROOT))
+                }
+            }
+
+            KeyMapTriggerError.CANT_DETECT_IN_PHONE_CALL -> {
+                viewModelScope.launch {
+                    displayUseCase.fixError(Error.CantDetectKeyEventsInPhoneCall)
+                }
+            }
+        }
     }
 
     fun onSnackBarClick(snackBar: ConfigKeyMapSnackbar) {
@@ -201,6 +251,7 @@ class ConfigKeyMapViewModel2 @Inject constructor(
 sealed class ConfigKeyMapDialog {
     object None : ConfigKeyMapDialog()
     object AccessibilitySettingsNotFound : ConfigKeyMapDialog()
+    object DndAccessExplanation : ConfigKeyMapDialog()
 }
 
 enum class ConfigKeyMapSnackbar {

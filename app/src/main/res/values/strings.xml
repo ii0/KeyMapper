@@ -528,7 +528,7 @@
     <string name="dialog_message_accessibility_service_explanation">@string/accessibility_service_explanation</string>
 
     <string name="dialog_title_fix_dnd_trigger_error">Grant Do Not Disturb access</string>
-    <string name="dialog_message_fix_dnd_trigger_error">You will be taken to your device\'s settings page to manage which apps can modify the Do Not Disturb state. This is <b>not present on some devices</b> so tap don\'t show again if you do not see Key Mapper in the list.</string>
+    <string name="dialog_message_fix_dnd_trigger_error">You will be taken to your device\'s settings page to manage which apps can modify the Do Not Disturb state. This is <b>not present on some devices</b> so tap \'never show again\' if you do not see Key Mapper in the list.</string>
 
     <string name="dialog_title_choose_to_show_volume_ui">Show volume UI?</string>
     <string name="dialog_title_choose_camera_flash">Choose camera flash</string>
@@ -553,7 +553,7 @@
     <string name="pos_ok">OK</string>
     <string name="pos_turn_on">Turn on</string>
     <string name="pos_restart">Restart</string>
-    <string name="pos_never_show_again">Never show again</string>
+    <string name="dialog_button_never_show_again">Never show again</string>
     <string name="pos_go_to_dont_kill_my_app">Open online guide</string>
     <string name="pos_confirm">Confirm</string>
 

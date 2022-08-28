@@ -173,7 +173,7 @@ object ViewModelHelper {
             message = resourceProvider.getText(R.string.dialog_message_fix_dnd_trigger_error),
             positiveButtonText = resourceProvider.getString(R.string.pos_ok),
             negativeButtonText = resourceProvider.getString(R.string.neg_cancel),
-            neutralButtonText = resourceProvider.getString(R.string.neg_dont_show_again)
+            neutralButtonText = resourceProvider.getString(R.string.dialog_button_never_show_again)
         )
 
         val dialogResponse = popupViewModel.showPopup("fix_dnd_trigger_error", dialog)

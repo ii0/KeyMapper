@@ -1,8 +1,10 @@
 package io.github.sds100.keymapper.mappings.keymaps
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.HelpOutline
@@ -15,6 +17,7 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
@@ -25,6 +28,7 @@ import io.github.sds100.keymapper.mappings.keymaps.trigger.ConfigKeyMapDialog
 import io.github.sds100.keymapper.mappings.keymaps.trigger.ConfigKeyMapSnackbar
 import io.github.sds100.keymapper.mappings.keymaps.trigger.ConfigKeyMapViewModel2
 import io.github.sds100.keymapper.mappings.keymaps.trigger.ConfigTriggerScreen
+import io.github.sds100.keymapper.util.ui.SwitchWithText
 import io.github.sds100.keymapper.util.ui.pagerTabIndicatorOffset
 import kotlinx.coroutines.launch
 
@@ -36,12 +40,15 @@ fun ConfigKeyMapScreen(
     viewModel: ConfigKeyMapViewModel2,
     navigateBack: () -> Unit,
 ) {
-    val triggerState by viewModel.state.collectAsState()
+    val triggerState by viewModel.triggerState.collectAsState()
+    val isKeyMapEnabled by viewModel.isKeyMapEnabled.collectAsState()
 
     ConfigKeyMapScreen(
         modifier = modifier,
         snackbar = viewModel.snackBar,
         dialog = viewModel.dialog,
+        isKeyMapEnabled = isKeyMapEnabled,
+        onKeyMapEnabledChange = viewModel::onKeyMapEnabledChange,
         navigateBack = navigateBack,
         onSaveClick = {
             viewModel.onSaveClick()
@@ -53,9 +60,12 @@ fun ConfigKeyMapScreen(
             ConfigTriggerScreen(
                 configState = triggerState,
                 onRecordTriggerClick = viewModel::onRecordTriggerClick,
-                onRemoveTriggerKeyClick = viewModel::onRemoveTriggerKeyClick
+                onRemoveTriggerKeyClick = viewModel::onRemoveTriggerKeyClick,
+                onFixTriggerErrorClick = viewModel::onFixTriggerErrorClick
             )
         },
+        onConfirmDndAccessErrorClick = viewModel::onConfirmDndAccessExplanationClick,
+        onNeverShowDndAccessErrorClick = viewModel::onNeverShowDndAccessErrorClick
     )
 }
 
@@ -65,11 +75,15 @@ private fun ConfigKeyMapScreen(
     modifier: Modifier = Modifier,
     snackbar: ConfigKeyMapSnackbar,
     dialog: ConfigKeyMapDialog,
+    isKeyMapEnabled: Boolean,
+    onKeyMapEnabledChange: (Boolean) -> Unit = {},
     navigateBack: () -> Unit = {},
     triggerScreen: @Composable () -> Unit = {},
     onSaveClick: () -> Unit = {},
     onSnackbarClick: (ConfigKeyMapSnackbar) -> Unit = {},
     onDismissDialog: () -> Unit = {},
+    onConfirmDndAccessErrorClick: () -> Unit = {},
+    onNeverShowDndAccessErrorClick: () -> Unit = {},
 ) {
     val pagerState = rememberPagerState()
     val scope = rememberCoroutineScope()
@@ -112,10 +126,17 @@ private fun ConfigKeyMapScreen(
     }
 
     when (dialog) {
+        ConfigKeyMapDialog.None -> {}
         ConfigKeyMapDialog.AccessibilitySettingsNotFound -> {
             AccessibilitySettingsNotFoundDialog(onDismiss = onDismissDialog)
         }
-        ConfigKeyMapDialog.None -> {}
+        ConfigKeyMapDialog.DndAccessExplanation -> {
+            DndAccessExplanationDialog(
+                onDismiss = onDismissDialog,
+                onConfirmClick = onConfirmDndAccessErrorClick,
+                onNeverShowAgainClick = onNeverShowDndAccessErrorClick
+            )
+        }
     }
 
     Scaffold(
@@ -123,7 +144,11 @@ private fun ConfigKeyMapScreen(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         bottomBar = {
             BottomAppBar(actions = {
-                BottomAppBarActions(navigateBack = navigateBack)
+                BottomAppBarActions(
+                    navigateBack = navigateBack,
+                    isKeyMapEnabled = isKeyMapEnabled,
+                    onKeyMapEnabledChange = onKeyMapEnabledChange
+                )
             }, floatingActionButton = {
                 FloatingActionButton(
                     onClick = onSaveClick,
@@ -164,13 +189,18 @@ private fun ConfigKeyMapScreen(
 }
 
 @Composable
-private fun BottomAppBarActions(navigateBack: () -> Unit) {
+private fun BottomAppBarActions(
+    navigateBack: () -> Unit,
+    isKeyMapEnabled: Boolean,
+    onKeyMapEnabledChange: (Boolean) -> Unit,
+) {
     var showDismissChangesDialog: Boolean by rememberSaveable { mutableStateOf(false) }
 
     BackHandler { showDismissChangesDialog = true }
 
     if (showDismissChangesDialog) {
-        AlertDialog(onDismissRequest = { showDismissChangesDialog = false },
+        AlertDialog(
+            onDismissRequest = { showDismissChangesDialog = false },
             title = { Text(stringResource(R.string.config_key_map_discard_changes_dialog_title)) },
             text = { Text(stringResource(R.string.config_key_map_discard_changes_dialog_message)) },
             confirmButton = {
@@ -194,14 +224,53 @@ private fun BottomAppBarActions(navigateBack: () -> Unit) {
     val uriHandler = LocalUriHandler.current
     val triggerGuideUrl = stringResource(R.string.url_trigger_guide)
 
-    IconButton(onClick = {
-        uriHandler.openUri(triggerGuideUrl)
-    }) {
+    TextButton(onClick = { uriHandler.openUri(triggerGuideUrl) }) {
+        Text(stringResource(R.string.action_help), color = MaterialTheme.colorScheme.onSurface)
+        Spacer(Modifier.width(8.dp))
         Icon(
             imageVector = Icons.Outlined.HelpOutline,
             contentDescription = stringResource(R.string.config_key_map_help_content_description)
         )
     }
+
+    SwitchWithText(
+        checked = isKeyMapEnabled,
+        onChange = onKeyMapEnabledChange,
+        text = {
+            Text(
+                stringResource(R.string.switch_enabled),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
+    )
+}
+
+@Composable
+private fun DndAccessExplanationDialog(
+    onDismiss: () -> Unit,
+    onConfirmClick: () -> Unit,
+    onNeverShowAgainClick: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.dialog_title_fix_dnd_trigger_error)) },
+        text = { Text(stringResource(R.string.dialog_message_fix_dnd_trigger_error)) },
+        confirmButton = {
+            TextButton(onClick = onConfirmClick) {
+                Text(stringResource(R.string.pos_confirm))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onNeverShowAgainClick) {
+                Text(stringResource(R.string.dialog_button_never_show_again))
+            }
+
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.neg_cancel))
+            }
+        },
+    )
 }
 
 @Composable
@@ -233,6 +302,7 @@ private fun AccessibilitySettingsNotFoundDialog(
 private fun Preview() {
     ConfigKeyMapScreen(
         snackbar = ConfigKeyMapSnackbar.ACCESSIBILITY_SERVICE_CRASHED,
-        dialog = ConfigKeyMapDialog.None
+        dialog = ConfigKeyMapDialog.None,
+        isKeyMapEnabled = true
     )
 }

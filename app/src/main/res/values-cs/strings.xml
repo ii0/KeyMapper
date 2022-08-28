@@ -415,7 +415,7 @@ Pokud by měla být spárována nějaká WiFi síť, nechte ji prázdnou.</strin
     <string name="pos_ok">Ok</string>
     <string name="pos_turn_on">Zapnout</string>
     <string name="pos_restart">Restartovat</string>
-    <string name="pos_never_show_again">Znovu nezobrazovat</string>
+    <string name="dialog_button_never_show_again">Znovu nezobrazovat</string>
     <string name="pos_go_to_dont_kill_my_app">Otevřít online průvodce</string>
     <string name="neg_turn_off">Vypnout</string>
     <string name="neg_stay_out">Zůstaňte mimo</string>

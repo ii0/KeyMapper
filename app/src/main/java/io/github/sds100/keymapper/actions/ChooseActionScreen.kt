@@ -722,7 +722,8 @@ private fun ConfigVolumeActionDialog(
             TextButton(onClick = onDismiss) {
                 Text(stringResource(R.string.neg_cancel))
             }
-        }
+        },
+        onDismissRequest = onDismiss
     ) {
         Column {
             CheckBoxWithText(
@@ -785,7 +786,8 @@ private fun ChooseRingerModeDialog(
             TextButton(onClick = onDismiss) {
                 Text(stringResource(R.string.neg_cancel))
             }
-        }
+        },
+        onDismissRequest = onDismiss
     ) {
         Column(Modifier.fillMaxWidth()) {
             RadioButtonWithText(
@@ -837,7 +839,8 @@ private fun ChooseDoNotDisturbModeDialog(
             TextButton(onClick = onDismiss) {
                 Text(stringResource(R.string.neg_cancel))
             }
-        }
+        },
+        onDismissRequest = onDismiss
     ) {
         Column(Modifier.fillMaxWidth()) {
             RadioButtonWithText(
@@ -881,7 +884,8 @@ private fun ChooseFlashlightDialog(
             TextButton(onClick = onDismiss) {
                 Text(stringResource(R.string.neg_cancel))
             }
-        }
+        },
+        onDismissRequest = onDismiss
     ) {
         Column(Modifier.fillMaxWidth()) {
             RadioButtonWithText(

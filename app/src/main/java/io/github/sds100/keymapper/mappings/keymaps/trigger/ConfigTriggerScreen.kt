@@ -39,6 +39,7 @@ fun ConfigTriggerScreen(
     onSelectClickType: (ClickType) -> Unit = {},
     onSelectParallelTriggerMode: () -> Unit = {},
     onSelectSequenceTriggerMode: () -> Unit = {},
+    onChooseTriggerKeyDeviceClick: (String) -> Unit = {},
 ) {
     Column(modifier) {
         if (configState.keys.isEmpty()) {
@@ -60,6 +61,7 @@ fun ConfigTriggerScreen(
                 onSelectClickType = onSelectClickType,
                 onSelectParallelMode = onSelectParallelTriggerMode,
                 onSelectSequenceMode = onSelectSequenceTriggerMode,
+                onChooseTriggerKeyDeviceClick = onChooseTriggerKeyDeviceClick
             )
         }
 
@@ -83,6 +85,7 @@ private fun TriggerUi(
     onSelectClickType: (ClickType) -> Unit,
     onSelectParallelMode: () -> Unit,
     onSelectSequenceMode: () -> Unit,
+    onChooseTriggerKeyDeviceClick: (String) -> Unit,
 ) {
     Column(modifier) {
         if (state.errors.isNotEmpty()) {
@@ -98,7 +101,8 @@ private fun TriggerUi(
             modifier = Modifier.weight(1f),
             keys = state.keys,
             onRemoveClick = onRemoveTriggerKeyClick,
-            onMove = onMoveKey
+            onMove = onMoveKey,
+            onChooseDeviceClick = onChooseTriggerKeyDeviceClick
         )
         if (state.availableClickTypes.isNotEmpty() && state.clickType != null) {
             ClickTypeButtons(
@@ -207,7 +211,6 @@ private fun ClickTypeButtons(
     }
 }
 
-
 @Composable
 private fun RecordTriggerButton(
     modifier: Modifier = Modifier,
@@ -239,7 +242,6 @@ private fun RecordTriggerButton(
         Text(text)
     }
 }
-
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -308,6 +310,7 @@ private fun KeyList(
     keys: List<TriggerKeyListItem2>,
     onMove: (from: Int, to: Int) -> Unit,
     onRemoveClick: (String) -> Unit,
+    onChooseDeviceClick: (String) -> Unit,
 ) {
     val dragDropState = rememberDragDropListState(onMove = onMove)
     val scope = rememberCoroutineScope()
@@ -324,7 +327,8 @@ private fun KeyList(
                 extraInfo = item.extraInfo,
                 linkType = item.linkType,
                 onRemoveClick = { onRemoveClick(item.uid) },
-                showDragHandle = showDragHandle
+                showDragHandle = showDragHandle,
+                onDevicesClick = { onChooseDeviceClick(item.uid) }
             )
         }
     }

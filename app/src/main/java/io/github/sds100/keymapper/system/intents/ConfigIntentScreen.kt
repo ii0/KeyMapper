@@ -101,13 +101,17 @@ private fun ConfigIntentScreen(
     onDeleteCategory: (String) -> Unit = {},
     onEditExtra: (String, IntentExtraRow) -> Unit = { _, _ -> },
     onDeleteExtra: (String) -> Unit = {},
-    onAddExtra: (IntentExtraRow) -> Unit = {}
+    onAddExtra: (IntentExtraRow) -> Unit = {},
 ) {
     Scaffold(
         bottomBar = {
             BottomAppBar(
                 floatingActionButton = {
-                    AnimatedVisibility(state.isDoneButtonEnabled, enter = fadeIn(), exit = fadeOut()) {
+                    AnimatedVisibility(
+                        state.isDoneButtonEnabled,
+                        enter = fadeIn(),
+                        exit = fadeOut()
+                    ) {
                         FloatingActionButton(
                             onClick = onDoneClick,
                             elevation = FloatingActionButtonDefaults.bottomAppBarFabElevation(),
@@ -217,7 +221,8 @@ private fun ConfigIntentScreen(
 
             OutlinedButton(
                 modifier = Modifier.fillMaxWidth(),
-                onClick = onChooseActivityClick) {
+                onClick = onChooseActivityClick
+            ) {
                 Text(stringResource(R.string.config_intent_screen_choose_component_button))
             }
 
@@ -238,7 +243,8 @@ private fun ConfigIntentScreen(
                 extras = state.extraRows,
                 onAdd = onAddExtra,
                 onEdit = onEditExtra,
-                onRemove = onDeleteExtra)
+                onRemove = onDeleteExtra
+            )
         }
     }
 }
@@ -256,7 +262,12 @@ private fun Preview() {
                     data = "data",
                     action = "action",
                     categories = setOf("CATEGORY_DEFAULT"),
-                    extraRows = listOf(IntentExtraRow.BooleanExtra("io.github.sds100.keymapper.KEY", true)),
+                    extraRows = listOf(
+                        IntentExtraRow.BooleanExtra(
+                            "io.github.sds100.keymapper.KEY",
+                            true
+                        )
+                    ),
                     flagsText = "123",
                     flags = emptySet(),
                     flagsError = IntentFlagsError.NOT_NUMBER,
@@ -276,7 +287,7 @@ private fun FlagsSection(
     flags: Set<Int>,
     error: IntentFlagsError,
     onChange: (String) -> Unit,
-    onChooseFlags: (Set<Int>) -> Unit
+    onChooseFlags: (Set<Int>) -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
 
@@ -292,7 +303,10 @@ private fun FlagsSection(
                 IconButton(onClick = {
                     showFlagsHelpDialog = true
                 }) {
-                    Icon(Icons.Outlined.HelpOutline, contentDescription = stringResource(R.string.config_intent_screen_flags_help_content_description))
+                    Icon(
+                        Icons.Outlined.HelpOutline,
+                        contentDescription = stringResource(R.string.config_intent_screen_flags_help_content_description)
+                    )
                 }
             },
             errorMessage = when (error) {
@@ -344,13 +358,16 @@ private fun FlagsSection(
 
 @Composable
 private fun FlagsHelpDialog(
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
 ) {
     val text = buildAnnotatedString {
         pushStyle(SpanStyle(color = MaterialTheme.colorScheme.onSurface))
         append(stringResource(R.string.config_intent_screen_flags_help_dialog_text_1))
 
-        pushStringAnnotation(tag = "docs", annotation = stringResource(R.string.url_intent_set_flags_help))
+        pushStringAnnotation(
+            tag = "docs",
+            annotation = stringResource(R.string.url_intent_set_flags_help)
+        )
         withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary)) {
             append(stringResource(R.string.config_intent_screen_flags_help_dialog_text_2))
         }
@@ -384,7 +401,7 @@ private fun ChooseFlagsDialog(
     chosenFlags: Set<Int>,
     onFlagCheckedChange: (Int, Boolean) -> Unit = { _, _ -> },
     onConfirm: () -> Unit = {},
-    onDismiss: () -> Unit = {}
+    onDismiss: () -> Unit = {},
 ) {
     val flagList = rememberSaveable { IntentUtils.availableFlags }
 
@@ -399,7 +416,9 @@ private fun ChooseFlagsDialog(
             TextButton(onClick = onDismiss) {
                 Text(stringResource(R.string.neg_cancel))
             }
-        }) {
+        },
+        onDismissRequest = onDismiss
+    ) {
         LazyColumn {
             items(flagList) { (flag, label) ->
                 CheckBoxWithText(
@@ -431,7 +450,7 @@ private fun CategoriesSection(
     categories: Set<String>,
     onAddCategory: (String) -> Unit,
     onEditCategory: (String, String) -> Unit,
-    onDeleteCategory: (String) -> Unit
+    onDeleteCategory: (String) -> Unit,
 ) {
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
@@ -511,7 +530,7 @@ private fun EditCategoryDialog(
     alreadyExists: Boolean,
     onTextChange: (String) -> Unit,
     onConfirm: (String) -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
 ) {
     val emptyError = stringResource(R.string.config_intent_screen_empty_category_error)
     val existsError = stringResource(R.string.config_intent_screen_category_exists_error)
@@ -532,7 +551,8 @@ private fun EditCategoryDialog(
         error = error,
         label = stringResource(R.string.config_intent_screen_category_name_label),
         onConfirm = onConfirm,
-        onDismiss = onDismiss)
+        onDismiss = onDismiss
+    )
 }
 
 @Composable
@@ -541,7 +561,7 @@ private fun ExtrasSection(
     extras: List<IntentExtraRow>,
     onAdd: (IntentExtraRow) -> Unit,
     onEdit: (String, IntentExtraRow) -> Unit,
-    onRemove: (String) -> Unit
+    onRemove: (String) -> Unit,
 ) {
     Column(modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
@@ -553,7 +573,14 @@ private fun ExtrasSection(
         var showAddExtraDialog by rememberSaveable { mutableStateOf(false) }
 
         if (showAddExtraDialog) {
-            var state: IntentExtraRow by rememberSaveable { mutableStateOf(IntentExtraRow.BooleanExtra("", true)) }
+            var state: IntentExtraRow by rememberSaveable {
+                mutableStateOf(
+                    IntentExtraRow.BooleanExtra(
+                        "",
+                        true
+                    )
+                )
+            }
             val alreadyExists by remember(state.name) {
                 derivedStateOf { extras.any { it.name == state.name } }
             }
@@ -627,7 +654,7 @@ private fun EditExtraDialog(
     onChange: (IntentExtraRow) -> Unit,
     keyExists: Boolean,
     onConfirm: () -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
 ) {
     val type = IntentExtraRow.toType(state)
 
@@ -684,7 +711,8 @@ private fun EditExtraDialog(
                         value = state.value,
                         error = valueError,
                         onChange = { onChange(state.copy(value = it)) },
-                        keyboardType = KeyboardType.Number)
+                        keyboardType = KeyboardType.Number
+                    )
                 }
                 is IntentExtraRow.CharArrayExtra -> {
                     EditExtraTextValue(
@@ -694,7 +722,9 @@ private fun EditExtraDialog(
                         onChange = { onChange(state.copy(value = it)) })
                 }
                 is IntentExtraRow.CharExtra -> {
-                    EditCharExtraValue(char = state.value, onChange = { onChange(state.copy(value = it)) })
+                    EditCharExtraValue(
+                        char = state.value,
+                        onChange = { onChange(state.copy(value = it)) })
                 }
                 is IntentExtraRow.DoubleArrayExtra -> {
                     EditExtraTextValue(
@@ -708,7 +738,8 @@ private fun EditExtraDialog(
                         value = state.value,
                         error = valueError,
                         onChange = { onChange(state.copy(value = it)) },
-                        keyboardType = KeyboardType.Number)
+                        keyboardType = KeyboardType.Number
+                    )
                 }
                 is IntentExtraRow.FloatArrayExtra -> {
                     EditExtraTextValue(
@@ -722,7 +753,8 @@ private fun EditExtraDialog(
                         value = state.value,
                         error = valueError,
                         onChange = { onChange(state.copy(value = it)) },
-                        keyboardType = KeyboardType.Number)
+                        keyboardType = KeyboardType.Number
+                    )
                 }
                 is IntentExtraRow.IntegerArrayExtra -> {
                     EditExtraTextValue(
@@ -736,7 +768,8 @@ private fun EditExtraDialog(
                         value = state.value,
                         error = valueError,
                         onChange = { onChange(state.copy(value = it)) },
-                        keyboardType = KeyboardType.Number)
+                        keyboardType = KeyboardType.Number
+                    )
                 }
                 is IntentExtraRow.LongArrayExtra -> {
                     EditExtraTextValue(
@@ -750,7 +783,8 @@ private fun EditExtraDialog(
                         value = state.value,
                         error = valueError,
                         onChange = { onChange(state.copy(value = it)) },
-                        keyboardType = KeyboardType.Number)
+                        keyboardType = KeyboardType.Number
+                    )
                 }
                 is IntentExtraRow.ShortArrayExtra -> {
                     EditExtraTextValue(
@@ -764,7 +798,8 @@ private fun EditExtraDialog(
                         value = state.value,
                         error = valueError,
                         onChange = { onChange(state.copy(value = it)) },
-                        keyboardType = KeyboardType.Number)
+                        keyboardType = KeyboardType.Number
+                    )
                 }
                 is IntentExtraRow.StringArrayExtra -> {
                     EditExtraTextValue(
@@ -794,7 +829,7 @@ private fun EditExtraDialog(
     onNameChange: (String) -> Unit,
     onSelectType: (IntentExtraType2) -> Unit,
     onConfirm: () -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
 ) {
     CustomDialog(
         title = title,
@@ -808,7 +843,8 @@ private fun EditExtraDialog(
                 Text(stringResource(R.string.neg_cancel))
             }
         },
-        onDismissRequest = onDismiss) {
+        onDismissRequest = onDismiss
+    ) {
         Column(Modifier.verticalScroll(rememberScrollState())) {
             var expanded by remember { mutableStateOf(false) }
             val focusManager = LocalFocusManager.current
@@ -866,7 +902,11 @@ private fun EditExtraDialog(
 }
 
 @Composable
-private fun EditBooleanExtraValue(modifier: Modifier = Modifier, value: Boolean, onChange: (Boolean) -> Unit) {
+private fun EditBooleanExtraValue(
+    modifier: Modifier = Modifier,
+    value: Boolean,
+    onChange: (Boolean) -> Unit,
+) {
     Row(modifier) {
         RadioButtonWithText(
             isSelected = value,
@@ -880,12 +920,14 @@ private fun EditBooleanExtraValue(modifier: Modifier = Modifier, value: Boolean,
 }
 
 @Composable
-private fun EditExtraTextValue(modifier: Modifier = Modifier,
-                               value: String,
-                               error: String?,
-                               caption: String = "",
-                               onChange: (String) -> Unit,
-                               keyboardType: KeyboardType = KeyboardType.Text) {
+private fun EditExtraTextValue(
+    modifier: Modifier = Modifier,
+    value: String,
+    error: String?,
+    caption: String = "",
+    onChange: (String) -> Unit,
+    keyboardType: KeyboardType = KeyboardType.Text,
+) {
     val focusManager = LocalFocusManager.current
 
     Column {
@@ -911,9 +953,11 @@ private fun EditExtraTextValue(modifier: Modifier = Modifier,
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun EditCharExtraValue(modifier: Modifier = Modifier,
-                               char: Char?,
-                               onChange: (Char?) -> Unit) {
+private fun EditCharExtraValue(
+    modifier: Modifier = Modifier,
+    char: Char?,
+    onChange: (Char?) -> Unit,
+) {
     val focusManager = LocalFocusManager.current
 
     OutlinedTextField(
@@ -958,7 +1002,7 @@ private fun ExtraRow(
     modifier: Modifier = Modifier,
     state: IntentExtraRow,
     onEditClick: () -> Unit,
-    onRemoveClick: () -> Unit
+    onRemoveClick: () -> Unit,
 ) {
     OutlinedCard(modifier) {
         Row(Modifier.padding(start = 16.dp, top = 8.dp, bottom = 8.dp)) {
@@ -976,10 +1020,16 @@ private fun ExtraRow(
 
             Column(Modifier.wrapContentWidth()) {
                 IconButton(onClick = onEditClick) {
-                    Icon(Icons.Outlined.Edit, contentDescription = stringResource(R.string.config_intent_screen_edit_extra_content_description))
+                    Icon(
+                        Icons.Outlined.Edit,
+                        contentDescription = stringResource(R.string.config_intent_screen_edit_extra_content_description)
+                    )
                 }
                 IconButton(onClick = onRemoveClick) {
-                    Icon(Icons.Outlined.Delete, contentDescription = stringResource(R.string.config_intent_screen_delete_extra_content_description))
+                    Icon(
+                        Icons.Outlined.Delete,
+                        contentDescription = stringResource(R.string.config_intent_screen_delete_extra_content_description)
+                    )
                 }
             }
         }
@@ -1013,7 +1063,8 @@ private fun getExtraValueError(extraRow: IntentExtraRow): String? {
         is IntentExtraRow.FloatArrayExtra,
         is IntentExtraRow.IntegerArrayExtra,
         is IntentExtraRow.LongArrayExtra,
-        is IntentExtraRow.ShortArrayExtra ->
+        is IntentExtraRow.ShortArrayExtra,
+        ->
             stringResource(R.string.config_intent_screen_extra_boolean_array_incorrect_format_error)
 
         is IntentExtraRow.ByteExtra ->
@@ -1032,7 +1083,8 @@ private fun getExtraValueError(extraRow: IntentExtraRow): String? {
         is IntentExtraRow.BooleanExtra,
         is IntentExtraRow.CharExtra,
         is IntentExtraRow.StringExtra,
-        is IntentExtraRow.StringArrayExtra -> null
+        is IntentExtraRow.StringArrayExtra,
+        -> null
     }
 
     if (!extraRow.isFormattedCorrectly) {
@@ -1118,19 +1170,26 @@ private fun CategoryRow(
     modifier: Modifier = Modifier,
     text: String,
     onEditClick: () -> Unit,
-    onRemoveClick: () -> Unit
+    onRemoveClick: () -> Unit,
 ) {
     OutlinedCard(modifier) {
-        Row(Modifier.padding(start = 16.dp, top = 8.dp, bottom = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            Modifier.padding(start = 16.dp, top = 8.dp, bottom = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Text(modifier = Modifier.weight(1f), text = text)
             Spacer(Modifier.width(8.dp))
             IconButton(onClick = onEditClick) {
-                Icon(Icons.Outlined.Edit,
-                    contentDescription = stringResource(R.string.config_intent_screen_edit_category_content_description))
+                Icon(
+                    Icons.Outlined.Edit,
+                    contentDescription = stringResource(R.string.config_intent_screen_edit_category_content_description)
+                )
             }
             IconButton(onClick = onRemoveClick) {
-                Icon(Icons.Outlined.Delete,
-                    contentDescription = stringResource(R.string.config_intent_screen_delete_category_content_description))
+                Icon(
+                    Icons.Outlined.Delete,
+                    contentDescription = stringResource(R.string.config_intent_screen_delete_category_content_description)
+                )
             }
         }
     }

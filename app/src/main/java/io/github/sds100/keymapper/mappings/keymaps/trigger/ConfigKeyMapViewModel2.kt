@@ -17,6 +17,7 @@ import io.github.sds100.keymapper.system.keyevents.KeyEventUtils
 import io.github.sds100.keymapper.system.permissions.Permission
 import io.github.sds100.keymapper.util.Error
 import io.github.sds100.keymapper.util.State
+import io.github.sds100.keymapper.util.firstBlocking
 import io.github.sds100.keymapper.util.ui.ResourceProvider
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -90,10 +91,7 @@ class ConfigKeyMapViewModel2 @Inject constructor(
     }
 
     fun onSaveClick() {
-        if (!loaded) {
-            configUseCase.save()
-            loaded = true
-        }
+        configUseCase.save()
     }
 
     fun loadNewKeyMap() {
@@ -105,7 +103,9 @@ class ConfigKeyMapViewModel2 @Inject constructor(
 
     fun loadKeyMap(uid: String) {
         viewModelScope.launch {
-            configUseCase.loadKeyMap(uid)
+            if (!loaded) {
+                configUseCase.loadKeyMap(uid)
+            }
         }
     }
 
@@ -113,15 +113,26 @@ class ConfigKeyMapViewModel2 @Inject constructor(
         configUseCase.setEnabled(enabled)
     }
 
-    fun onDismissDialog() {
+    fun onConfirmDialog() {
+        dialog.also { d ->
+            when (d) {
+                ConfigKeyMapDialog.None -> {}
+                ConfigKeyMapDialog.AccessibilitySettingsNotFound -> {}
+                is ConfigKeyMapDialog.ChooseTriggerKeyDevice -> {
+                    configUseCase.setTriggerKeyDevice(d.keyUid, d.selectedDevice)
+                }
+
+                ConfigKeyMapDialog.DndAccessExplanation -> viewModelScope.launch {
+                    displayUseCase.fixError(Error.PermissionDenied(Permission.ACCESS_NOTIFICATION_POLICY))
+                }
+            }
+        }
+
         dialog = ConfigKeyMapDialog.None
     }
 
-    fun onConfirmDndAccessExplanationClick() {
-        viewModelScope.launch {
-            displayUseCase.fixError(Error.PermissionDenied(Permission.ACCESS_NOTIFICATION_POLICY))
-            dialog = ConfigKeyMapDialog.None
-        }
+    fun onDismissDialog() {
+        dialog = ConfigKeyMapDialog.None
     }
 
     fun onNeverShowDndAccessErrorClick() {
@@ -215,6 +226,26 @@ class ConfigKeyMapViewModel2 @Inject constructor(
         configUseCase.setSequenceTriggerMode()
     }
 
+    fun onSelectTriggerKeyDevice(device: TriggerKeyDevice) {
+        dialog.let {
+            if (it is ConfigKeyMapDialog.ChooseTriggerKeyDevice) {
+                dialog = it.copy(selectedDevice = device)
+            }
+        }
+    }
+
+    fun onChooseTriggerKeyDeviceClick(keyUid: String) {
+        val key = keyMapFlow.firstBlocking()
+            .trigger.keys.singleOrNull { it.uid == keyUid }
+            ?: return
+
+        dialog = ConfigKeyMapDialog.ChooseTriggerKeyDevice(
+            keyUid,
+            configUseCase.getAvailableTriggerKeyDevices(),
+            selectedDevice = key.device
+        )
+    }
+
     private fun buildKeyListItems(trigger: KeyMapTrigger): List<TriggerKeyListItem2> {
         return trigger.keys.mapIndexed { index, key ->
             val linkType = if (index == trigger.keys.lastIndex) {
@@ -303,6 +334,12 @@ sealed class ConfigKeyMapDialog {
     object None : ConfigKeyMapDialog()
     object AccessibilitySettingsNotFound : ConfigKeyMapDialog()
     object DndAccessExplanation : ConfigKeyMapDialog()
+    data class ChooseTriggerKeyDevice(
+        val keyUid: String,
+        val devices: List<TriggerKeyDevice>,
+        val selectedDevice: TriggerKeyDevice,
+    ) :
+        ConfigKeyMapDialog()
 }
 
 enum class ConfigKeyMapSnackbar {

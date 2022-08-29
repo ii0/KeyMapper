@@ -282,7 +282,6 @@ class ConfigKeyMapUseCaseImpl @Inject constructor(
             val showDeviceDescriptors = showDeviceDescriptors.firstBlocking()
 
             inputDevices.forEach { device ->
-
                 if (device.isExternal) {
                     val name = if (showDeviceDescriptors) {
                         InputDeviceUtils.appendDeviceDescriptorToName(

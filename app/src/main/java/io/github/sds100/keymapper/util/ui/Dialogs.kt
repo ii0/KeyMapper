@@ -18,7 +18,7 @@ fun CustomDialog(
     title: String,
     confirmButton: @Composable () -> Unit,
     dismissButton: @Composable () -> Unit,
-    onDismissRequest: () -> Unit = {},
+    onDismissRequest: () -> Unit,
     content: @Composable BoxScope.() -> Unit,
 ) {
     Dialog(
@@ -72,7 +72,8 @@ private fun Preview() {
                 TextButton(onClick = { }) {
                     Text("Cancel")
                 }
-            }
+            },
+            onDismissRequest = {}
         ) {
             LazyColumn {
                 item {

@@ -3,6 +3,8 @@ package io.github.sds100.keymapper.mappings.keymaps
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.HelpOutline
@@ -24,10 +26,9 @@ import com.google.accompanist.pager.rememberPagerState
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootNavGraph
 import io.github.sds100.keymapper.R
-import io.github.sds100.keymapper.mappings.keymaps.trigger.ConfigKeyMapDialog
-import io.github.sds100.keymapper.mappings.keymaps.trigger.ConfigKeyMapSnackbar
-import io.github.sds100.keymapper.mappings.keymaps.trigger.ConfigKeyMapViewModel2
-import io.github.sds100.keymapper.mappings.keymaps.trigger.ConfigTriggerScreen
+import io.github.sds100.keymapper.mappings.keymaps.trigger.*
+import io.github.sds100.keymapper.util.ui.CustomDialog
+import io.github.sds100.keymapper.util.ui.RadioButtonWithText
 import io.github.sds100.keymapper.util.ui.SwitchWithText
 import io.github.sds100.keymapper.util.ui.pagerTabIndicatorOffset
 import kotlinx.coroutines.launch
@@ -67,10 +68,12 @@ fun ConfigKeyMapScreen(
                 onSelectClickType = viewModel::onSelectClickType,
                 onSelectParallelTriggerMode = viewModel::onSelectParallelTriggerMode,
                 onSelectSequenceTriggerMode = viewModel::onSelectSequenceTriggerMode,
+                onChooseTriggerKeyDeviceClick = viewModel::onChooseTriggerKeyDeviceClick
             )
         },
-        onConfirmDndAccessErrorClick = viewModel::onConfirmDndAccessExplanationClick,
-        onNeverShowDndAccessErrorClick = viewModel::onNeverShowDndAccessErrorClick
+        onConfirmDialog = viewModel::onConfirmDialog,
+        onNeverShowDndAccessErrorClick = viewModel::onNeverShowDndAccessErrorClick,
+        onSelectTriggerKeyDevice = viewModel::onSelectTriggerKeyDevice
     )
 }
 
@@ -87,8 +90,9 @@ private fun ConfigKeyMapScreen(
     onSaveClick: () -> Unit = {},
     onSnackbarClick: (ConfigKeyMapSnackbar) -> Unit = {},
     onDismissDialog: () -> Unit = {},
-    onConfirmDndAccessErrorClick: () -> Unit = {},
+    onConfirmDialog: () -> Unit = {},
     onNeverShowDndAccessErrorClick: () -> Unit = {},
+    onSelectTriggerKeyDevice: (TriggerKeyDevice) -> Unit = {},
 ) {
     val pagerState = rememberPagerState()
     val scope = rememberCoroutineScope()
@@ -138,8 +142,17 @@ private fun ConfigKeyMapScreen(
         ConfigKeyMapDialog.DndAccessExplanation -> {
             DndAccessExplanationDialog(
                 onDismiss = onDismissDialog,
-                onConfirmClick = onConfirmDndAccessErrorClick,
+                onConfirmClick = onConfirmDialog,
                 onNeverShowAgainClick = onNeverShowDndAccessErrorClick
+            )
+        }
+        is ConfigKeyMapDialog.ChooseTriggerKeyDevice -> {
+            ChooseTriggerKeyDeviceDialog(
+                selectedDevice = dialog.selectedDevice,
+                devices = dialog.devices,
+                onSelectDevice = onSelectTriggerKeyDevice,
+                onConfirm = onConfirmDialog,
+                onDismiss = onDismissDialog
             )
         }
     }
@@ -308,6 +321,46 @@ private fun AccessibilitySettingsNotFoundDialog(
             }
         }
     )
+}
+
+@Composable
+private fun ChooseTriggerKeyDeviceDialog(
+    selectedDevice: TriggerKeyDevice,
+    devices: List<TriggerKeyDevice>,
+    onSelectDevice: (TriggerKeyDevice) -> Unit,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    CustomDialog(
+        onDismissRequest = onDismiss,
+        title = stringResource(R.string.dialog_title_choose_device),
+        confirmButton = {
+            TextButton(onClick = onConfirm) {
+                Text(stringResource(R.string.pos_confirm))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.neg_cancel))
+            }
+        }) {
+
+        LazyColumn {
+            items(devices) { device ->
+                val text = when (device) {
+                    TriggerKeyDevice.Any -> stringResource(R.string.any_device)
+                    is TriggerKeyDevice.External -> device.name
+                    TriggerKeyDevice.Internal -> stringResource(R.string.this_device)
+                }
+
+                RadioButtonWithText(
+                    modifier = Modifier.fillMaxWidth(),
+                    isSelected = device == selectedDevice,
+                    text = { Text(text) },
+                    onClick = { onSelectDevice(device) })
+            }
+        }
+    }
 }
 
 @Preview(device = Devices.PIXEL_4)

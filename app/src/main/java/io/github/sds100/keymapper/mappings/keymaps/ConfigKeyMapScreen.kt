@@ -1,6 +1,7 @@
 package io.github.sds100.keymapper.mappings.keymaps
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowBack
@@ -9,7 +10,9 @@ import androidx.compose.material.icons.outlined.Save
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Devices
@@ -60,7 +63,10 @@ fun ConfigKeyMapScreen(
                 onRecordTriggerClick = viewModel::onRecordTriggerClick,
                 onRemoveTriggerKeyClick = viewModel::onRemoveTriggerKeyClick,
                 onFixTriggerErrorClick = viewModel::onFixTriggerErrorClick,
-                onMoveTriggerKey = viewModel::onMoveTriggerKey
+                onMoveTriggerKey = viewModel::onMoveTriggerKey,
+                onSelectClickType = viewModel::onSelectClickType,
+                onSelectParallelTriggerMode = viewModel::onSelectParallelTriggerMode,
+                onSelectSequenceTriggerMode = viewModel::onSelectSequenceTriggerMode,
             )
         },
         onConfirmDndAccessErrorClick = viewModel::onConfirmDndAccessExplanationClick,
@@ -223,8 +229,16 @@ private fun BottomAppBarActions(
     val uriHandler = LocalUriHandler.current
     val triggerGuideUrl = stringResource(R.string.url_trigger_guide)
 
-    TextButton(onClick = { uriHandler.openUri(triggerGuideUrl) }) {
-        Text(stringResource(R.string.action_help), color = MaterialTheme.colorScheme.onSurface)
+    Row(Modifier
+        .clip(ShapeDefaults.Medium)
+        .clickable { uriHandler.openUri(triggerGuideUrl) }
+        .padding(8.dp),
+        verticalAlignment = Alignment.CenterVertically) {
+        Text(
+            stringResource(R.string.action_help),
+            color = MaterialTheme.colorScheme.onSurface,
+            style = MaterialTheme.typography.labelLarge
+        )
         Spacer(Modifier.width(8.dp))
         Icon(
             imageVector = Icons.Outlined.HelpOutline,

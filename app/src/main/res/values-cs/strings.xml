@@ -17,7 +17,7 @@
     <string name="your_device_doesnt_support_some_actions">Vaše zařízení nepodporuje tyto akce.</string>
     <string name="tab_unsupported_actions">Nepodporované akce</string>
     <string name="choose_action_warning_requires_root">Vyžaduje kořen</string>
-    <string name="press_dot_dot_dot">Stiskněte…</string>
+    <string name="config_trigger_press_dot_dot_dot">Stiskněte…</string>
     <string name="no_actions">Žádné akce</string>
     <string name="no_trigger">Žádný spouštěč</string>
     <string name="unknown_keycode">Neznámý kód klíče: %s</string>
@@ -136,8 +136,8 @@
     <string name="hint_wifi_ssid">WiFi síť SSID</string>
     <!--  Hints  -->
     <!--  Radio buttons  -->
-    <string name="radio_button_parallel">Současně</string>
-    <string name="radio_button_sequence">V posloupnosti</string>
+    <string name="config_trigger_parallel_mode_button">Současně</string>
+    <string name="config_trigger_sequence_mode_button">V posloupnosti</string>
     <string name="radio_button_and">A</string>
     <string name="radio_button_or">NEBO</string>
     <string name="radio_button_short_press">Krátký stisk</string>
@@ -389,12 +389,12 @@ Pokud by měla být spárována nějaká WiFi síť, nechte ji prázdnou.</strin
     <string name="dialog_message_restart_accessibility_service_to_record_trigger">Restartujte službu přístupnosti vypnutím <i>vypněte</i> a <i>zapněte</i> , abyste mohli zaznamenat spouštěč.</string>
     <string name="dialog_message_enable_accessibility_service_to_test_action">Zapněte službu usnadnění přístupu, abyste mohli vyzkoušet akci.</string>
     <string name="dialog_message_restart_accessibility_service_to_test_action">Restartujte službu přístupnosti vypnutím <i>vypněte</i> a <i>dne</i> , abyste mohli vyzkoušet akci.</string>
-    <string name="dialog_message_restart_accessibility_service">Restartujte službu přístupnosti vypnutím <i></i> a <i>dne</i>.</string>
+    <string name="dialog_message_restart_accessibility_service">Restartujte službu přístupnosti vypnutím a <i>dne</i>.</string>
     <string name="dialog_message_screen_pinning_warning">Použití tohoto spouštěče může způsobit černou obrazovku, když odemknete zařízení po použití nastavení připnutí obrazovky v nastavení zařízení. To lze opravit restartem. To se neděje na všech zařízeních, takže beware a vypněte nastavení, pokud tak učiní!</string>
     <string name="dialog_title_reset_fingerprint_maps">Obnovit mapy gesta otisků prstů</string>
     <string name="dialog_message_reset_fingerprint_maps">Jste si jisti, že chcete obnovit mapy gesta otisků prstů?</string>
     <string name="dialog_title_key_mapper_crashed">Mapa klíče byla ukončena nebo havarována</string>
-    <string name="dialog_message_key_mapper_crashed">Je velmi pravděpodobné, že váš telefon ukončil klávesovou mapu, zatímco se pokoušel běžet na pozadí. Tohle není <b></b> chyba vývojáře a není nic, co by mohli udělat pro opravu, proto prosím neponechejte špatnou recenzi 😃.
+    <string name="dialog_message_key_mapper_crashed">Je velmi pravděpodobné, že váš telefon ukončil klávesovou mapu, zatímco se pokoušel běžet na pozadí. Tohle není chyba vývojáře a není nic, co by mohli udělat pro opravu, proto prosím neponechejte špatnou recenzi 😃.
 
     \n\nSledujete průvodce dontkillmyapp.com před tím, aby váš telefon zastavil zabíjení Mapper?</string>
     <string name="dialog_button_read_dont_kill_my_app_yes">Ano</string>

@@ -53,7 +53,7 @@ fun ChooseActionScreen(
     tapScreenActionResultRecipient: ResultRecipient<CreateTapScreenActionScreenDestination, PickCoordinateResult>,
     chooseSoundResultRecipient: ResultRecipient<ChooseSoundScreenDestination, ChooseSoundResult>,
     configKeyEventResultRecipient: ResultRecipient<ConfigKeyEventScreenDestination, ActionData.InputKeyEvent>,
-    configIntentResultRecipient: ResultRecipient<ConfigIntentScreenDestination, ConfigIntentResult>
+    configIntentResultRecipient: ResultRecipient<ConfigIntentScreenDestination, ConfigIntentResult>,
 ) {
     keyCodeResultRecipient.onNavResult { result ->
         when (result) {
@@ -328,7 +328,7 @@ private fun ChooseActionScreen(
     onConfigVolumeAction: (Boolean, VolumeStream) -> Unit = { _, _ -> },
     onChooseRingerMode: (RingerMode) -> Unit = {},
     onChooseDoNotDisturbMode: (DndMode) -> Unit = {},
-    onChooseFlashlight: (CameraLens) -> Unit = {}
+    onChooseFlashlight: (CameraLens) -> Unit = {},
 ) {
     Scaffold(modifier, bottomBar = {
         SearchAppBar(onBack, searchState, setSearchState) {
@@ -485,7 +485,7 @@ private fun ChooseActionScreen(
 private fun ChooseActionList(
     modifier: Modifier = Modifier,
     listItems: List<ChooseActionListItem>,
-    onActionClick: (ActionId) -> Unit
+    onActionClick: (ActionId) -> Unit,
 ) {
     val listState = rememberLazyListState()
 
@@ -528,7 +528,11 @@ private fun ChooseActionList(
 }
 
 @Composable
-private fun ActionListItem(modifier: Modifier, listItem: ChooseActionListItem.Action, onClick: () -> Unit) {
+private fun ActionListItem(
+    modifier: Modifier,
+    listItem: ChooseActionListItem.Action,
+    onClick: () -> Unit,
+) {
     if (listItem.error == null) {
         SimpleListItem(
             modifier = modifier,
@@ -553,7 +557,11 @@ private fun ActionListItem(modifier: Modifier, listItem: ChooseActionListItem.Ac
                 Text(listItem.title, style = MaterialTheme.typography.bodyMedium)
             },
             subtitle = {
-                Text(listItem.error, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
+                Text(
+                    listItem.error,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error
+                )
             },
             enabled = listItem.isEnabled,
             onClick = onClick
@@ -573,7 +581,8 @@ private fun ConfigCycleRotationDialog(
         title = stringResource(R.string.choose_action_cycle_orientations_dialog_title),
         confirmButton = {
             TextButton(
-                onClick = { onConfirmClick(orientations.toList()) }, enabled = orientations.isNotEmpty()
+                onClick = { onConfirmClick(orientations.toList()) },
+                enabled = orientations.isNotEmpty()
             ) {
                 Text(stringResource(R.string.pos_confirm))
             }
@@ -666,7 +675,7 @@ private fun ChooseInputMethodDialog(
                 RadioButtonWithText(
                     modifier = Modifier.fillMaxWidth(),
                     isSelected = selectedIme == imeInfo,
-                    text = imeInfo.label,
+                    text = { Text(imeInfo.label) },
                     onClick = { selectedIme = imeInfo }
                 )
             }
@@ -681,7 +690,13 @@ private fun ChooseInputMethodDialogPreview() {
         ChooseInputMethodDialog(
             inputMethods = listOf(
                 ImeInfo("id0", "package0", "Gboard", isEnabled = true, isChosen = true),
-                ImeInfo("id1", "package1", "Key Mapper GUI Keyboard", isEnabled = true, isChosen = true),
+                ImeInfo(
+                    "id1",
+                    "package1",
+                    "Key Mapper GUI Keyboard",
+                    isEnabled = true,
+                    isChosen = true
+                ),
             )
         )
     }
@@ -691,7 +706,7 @@ private fun ChooseInputMethodDialogPreview() {
 private fun ConfigVolumeActionDialog(
     title: String,
     onConfirm: (showVolumeDialog: Boolean, stream: VolumeStream) -> Unit = { _, _ -> },
-    onDismiss: () -> Unit = {}
+    onDismiss: () -> Unit = {},
 ) {
     var showVolumeDialog: Boolean by rememberSaveable { mutableStateOf(true) }
     var selectedStream: VolumeStream by rememberSaveable { mutableStateOf(VolumeStream.DEFAULT) }
@@ -730,7 +745,7 @@ private fun ConfigVolumeActionDialog(
                     RadioButtonWithText(
                         modifier = Modifier.fillMaxWidth(),
                         isSelected = selectedStream == stream,
-                        text = stringResource(VolumeStreamUtils.getLabel(stream)),
+                        text = { Text(stringResource(VolumeStreamUtils.getLabel(stream))) },
                         onClick = { selectedStream = stream }
                     )
                 }
@@ -752,14 +767,17 @@ private fun ConfigVolumeActionDialogPreview() {
 @Composable
 private fun ChooseRingerModeDialog(
     onConfirm: (RingerMode) -> Unit = { _ -> },
-    onDismiss: () -> Unit = {}
+    onDismiss: () -> Unit = {},
 ) {
     var selectedRingerMode: RingerMode? by rememberSaveable { mutableStateOf(null) }
 
     CustomDialog(
         title = stringResource(R.string.choose_action_choose_ringer_mode_dialog_title),
         confirmButton = {
-            TextButton(onClick = { onConfirm(selectedRingerMode!!) }, enabled = selectedRingerMode != null) {
+            TextButton(
+                onClick = { onConfirm(selectedRingerMode!!) },
+                enabled = selectedRingerMode != null
+            ) {
                 Text(stringResource(R.string.pos_confirm))
             }
         },
@@ -773,19 +791,19 @@ private fun ChooseRingerModeDialog(
             RadioButtonWithText(
                 modifier = Modifier.fillMaxWidth(),
                 isSelected = selectedRingerMode == RingerMode.NORMAL,
-                text = stringResource(R.string.ringer_mode_normal),
+                text = { Text(stringResource(R.string.ringer_mode_normal)) },
                 onClick = { selectedRingerMode = RingerMode.NORMAL }
             )
             RadioButtonWithText(
                 modifier = Modifier.fillMaxWidth(),
                 isSelected = selectedRingerMode == RingerMode.VIBRATE,
-                text = stringResource(R.string.ringer_mode_vibrate),
+                text = { Text(stringResource(R.string.ringer_mode_vibrate)) },
                 onClick = { selectedRingerMode = RingerMode.VIBRATE }
             )
             RadioButtonWithText(
                 modifier = Modifier.fillMaxWidth(),
                 isSelected = selectedRingerMode == RingerMode.SILENT,
-                text = stringResource(R.string.ringer_mode_silent),
+                text = { Text(stringResource(R.string.ringer_mode_silent)) },
                 onClick = { selectedRingerMode = RingerMode.SILENT }
             )
         }
@@ -804,7 +822,7 @@ private fun ChooseRingerModeDialogPreview() {
 private fun ChooseDoNotDisturbModeDialog(
     title: String,
     onConfirm: (DndMode) -> Unit = { _ -> },
-    onDismiss: () -> Unit = {}
+    onDismiss: () -> Unit = {},
 ) {
     var selectedMode: DndMode? by rememberSaveable { mutableStateOf(null) }
 
@@ -825,19 +843,19 @@ private fun ChooseDoNotDisturbModeDialog(
             RadioButtonWithText(
                 modifier = Modifier.fillMaxWidth(),
                 isSelected = selectedMode == DndMode.ALARMS,
-                text = stringResource(R.string.dnd_mode_alarms),
+                text = { Text(stringResource(R.string.dnd_mode_alarms)) },
                 onClick = { selectedMode = DndMode.ALARMS }
             )
             RadioButtonWithText(
                 modifier = Modifier.fillMaxWidth(),
                 isSelected = selectedMode == DndMode.NONE,
-                text = stringResource(R.string.dnd_mode_none),
+                text = { Text(stringResource(R.string.dnd_mode_none)) },
                 onClick = { selectedMode = DndMode.NONE }
             )
             RadioButtonWithText(
                 modifier = Modifier.fillMaxWidth(),
                 isSelected = selectedMode == DndMode.PRIORITY,
-                text = stringResource(R.string.dnd_mode_priority),
+                text = { Text(stringResource(R.string.dnd_mode_priority)) },
                 onClick = { selectedMode = DndMode.PRIORITY }
             )
         }
@@ -848,7 +866,7 @@ private fun ChooseDoNotDisturbModeDialog(
 private fun ChooseFlashlightDialog(
     title: String,
     onConfirm: (CameraLens) -> Unit = { _ -> },
-    onDismiss: () -> Unit = {}
+    onDismiss: () -> Unit = {},
 ) {
     var selectedFlashlight: CameraLens by rememberSaveable { mutableStateOf(CameraLens.BACK) }
 
@@ -869,13 +887,13 @@ private fun ChooseFlashlightDialog(
             RadioButtonWithText(
                 modifier = Modifier.fillMaxWidth(),
                 isSelected = selectedFlashlight == CameraLens.BACK,
-                text = stringResource(R.string.lens_back),
+                text = { Text(stringResource(R.string.lens_back)) },
                 onClick = { selectedFlashlight = CameraLens.BACK }
             )
             RadioButtonWithText(
                 modifier = Modifier.fillMaxWidth(),
                 isSelected = selectedFlashlight == CameraLens.FRONT,
-                text = stringResource(R.string.lens_front),
+                text = { Text(stringResource(R.string.lens_front)) },
                 onClick = { selectedFlashlight = CameraLens.FRONT }
             )
         }

@@ -7,7 +7,7 @@ import io.github.sds100.keymapper.constraints.ConstraintMode
 import io.github.sds100.keymapper.constraints.ConstraintState
 import io.github.sds100.keymapper.util.State
 import io.github.sds100.keymapper.util.ifIsData
-import io.github.sds100.keymapper.util.moveElement
+import io.github.sds100.keymapper.util.move
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -67,7 +67,7 @@ abstract class BaseConfigMappingUseCase<ACTION : Action, T : Mapping<ACTION>> :
     override fun moveAction(fromIndex: Int, toIndex: Int) {
         mapping.value.ifIsData { mapping ->
             mapping.actionList.toMutableList().apply {
-                moveElement(fromIndex, toIndex)
+                move(fromIndex, toIndex)
                 setActionList(this)
             }
         }

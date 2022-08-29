@@ -21,7 +21,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.google.android.material.color.MaterialColors
 import io.github.sds100.keymapper.R
+import io.github.sds100.keymapper.mappings.ClickType
 import io.github.sds100.keymapper.theme.Colors
+import io.github.sds100.keymapper.util.ui.RadioButtonWithText
 import io.github.sds100.keymapper.util.ui.dragdrop.dragAndDrop
 import io.github.sds100.keymapper.util.ui.dragdrop.dragAndDropItemAnimation
 import io.github.sds100.keymapper.util.ui.dragdrop.rememberDragDropListState
@@ -34,13 +36,18 @@ fun ConfigTriggerScreen(
     onRemoveTriggerKeyClick: (String) -> Unit = {},
     onFixTriggerErrorClick: (KeyMapTriggerError) -> Unit = {},
     onMoveTriggerKey: (from: Int, to: Int) -> Unit = { _, _ -> },
+    onSelectClickType: (ClickType) -> Unit = {},
+    onSelectParallelTriggerMode: () -> Unit = {},
+    onSelectSequenceTriggerMode: () -> Unit = {},
 ) {
     Column(modifier) {
         if (configState.keys.isEmpty()) {
-            EmptyTriggerUi(modifier = Modifier
-                .fillMaxSize()
-                .padding(8.dp)
-                .weight(1f))
+            EmptyTriggerUi(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(8.dp)
+                    .weight(1f)
+            )
         } else {
             TriggerUi(
                 modifier = Modifier
@@ -49,13 +56,17 @@ fun ConfigTriggerScreen(
                 state = configState,
                 onRemoveTriggerKeyClick = onRemoveTriggerKeyClick,
                 onFixErrorClick = onFixTriggerErrorClick,
-                onMoveKey = onMoveTriggerKey)
+                onMoveKey = onMoveTriggerKey,
+                onSelectClickType = onSelectClickType,
+                onSelectParallelMode = onSelectParallelTriggerMode,
+                onSelectSequenceMode = onSelectSequenceTriggerMode,
+            )
         }
 
         RecordTriggerButton(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(8.dp),
+                .padding(start = 8.dp, end = 8.dp, bottom = 8.dp),
             onClick = onRecordTriggerClick,
             state = configState.recordTriggerState
         )
@@ -69,30 +80,145 @@ private fun TriggerUi(
     onRemoveTriggerKeyClick: (String) -> Unit,
     onFixErrorClick: (KeyMapTriggerError) -> Unit,
     onMoveKey: (from: Int, to: Int) -> Unit,
+    onSelectClickType: (ClickType) -> Unit,
+    onSelectParallelMode: () -> Unit,
+    onSelectSequenceMode: () -> Unit,
 ) {
     Column(modifier) {
-        ErrorList(modifier = Modifier.wrapContentHeight(), errors = state.errors, onFixClick = onFixErrorClick)
-        Spacer(Modifier.height(8.dp))
-        KeyList(modifier = Modifier.fillMaxSize(), keys = state.keys, onRemoveClick = onRemoveTriggerKeyClick, onMove = onMoveKey)
+        if (state.errors.isNotEmpty()) {
+            ErrorList(
+                modifier = Modifier.wrapContentHeight(),
+                errors = state.errors,
+                onFixClick = onFixErrorClick
+            )
+            Spacer(Modifier.height(8.dp))
+        }
+
+        KeyList(
+            modifier = Modifier.weight(1f),
+            keys = state.keys,
+            onRemoveClick = onRemoveTriggerKeyClick,
+            onMove = onMoveKey
+        )
+        if (state.availableClickTypes.isNotEmpty() && state.clickType != null) {
+            ClickTypeButtons(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(end = 8.dp),
+                clickType = state.clickType,
+                availableButtons = state.availableClickTypes,
+                onSelect = onSelectClickType
+            )
+        }
+        TriggerModeButtons(
+            modifier = Modifier.fillMaxWidth(),
+            mode = state.mode,
+            enabled = state.isModeButtonsEnabled,
+            onSelectParallelMode = onSelectParallelMode,
+            onSelectSequenceMode = onSelectSequenceMode
+        )
     }
 }
 
 @Composable
 private fun EmptyTriggerUi(modifier: Modifier = Modifier) {
     Box(modifier) {
-        Text(modifier = Modifier
-            .fillMaxWidth()
-            .align(Alignment.Center)
-            .padding(48.dp),
+        Text(
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.Center)
+                .padding(48.dp),
             text = stringResource(R.string.config_trigger_empty_text),
-            style = MaterialTheme.typography.bodyLarge)
+            style = MaterialTheme.typography.bodyLarge
+        )
     }
 }
 
 @Composable
-private fun RecordTriggerButton(modifier: Modifier = Modifier, onClick: () -> Unit, state: RecordTriggerState) {
+private fun TriggerModeButtons(
+    modifier: Modifier,
+    mode: TriggerMode,
+    enabled: Boolean,
+    onSelectParallelMode: () -> Unit,
+    onSelectSequenceMode: () -> Unit,
+) {
+    Column(modifier) {
+        Text(
+            modifier = Modifier.padding(start = 8.dp, end = 8.dp),
+            text = stringResource(R.string.config_trigger_press_dot_dot_dot),
+            style = MaterialTheme.typography.bodyMedium
+        )
+        Row(Modifier.fillMaxWidth()) {
+            RadioButtonWithText(
+                modifier = Modifier.weight(1f),
+                isSelected = mode is TriggerMode.Parallel,
+                text = {
+                    Text(
+                        stringResource(R.string.config_trigger_parallel_mode_button),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                },
+                enabled = enabled,
+                onClick = onSelectParallelMode
+            )
+            RadioButtonWithText(
+                modifier = Modifier.weight(1f),
+                isSelected = mode is TriggerMode.Sequence,
+                text = {
+                    Text(
+                        stringResource(R.string.config_trigger_sequence_mode_button),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                },
+                enabled = enabled,
+                onClick = onSelectSequenceMode
+            )
+        }
+    }
+}
+
+private val clickTypeButtonText: Map<ClickType, Int> = mapOf(
+    ClickType.SHORT_PRESS to R.string.clicktype_short_press,
+    ClickType.LONG_PRESS to R.string.clicktype_long_press,
+    ClickType.DOUBLE_PRESS to R.string.clicktype_double_press,
+)
+
+@Composable
+private fun ClickTypeButtons(
+    modifier: Modifier,
+    clickType: ClickType,
+    availableButtons: List<ClickType>,
+    onSelect: (ClickType) -> Unit,
+) {
+    Row(modifier, horizontalArrangement = Arrangement.SpaceBetween) {
+        availableButtons.forEach { button ->
+            RadioButtonWithText(
+                modifier = Modifier.weight(1f),
+                isSelected = clickType == button,
+                text = {
+                    Text(
+                        stringResource(clickTypeButtonText[button]!!),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                },
+                onClick = { onSelect(button) }
+            )
+        }
+    }
+}
+
+
+@Composable
+private fun RecordTriggerButton(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+    state: RecordTriggerState,
+) {
     val harmonizedRedColorInt =
-        MaterialColors.harmonizeWithPrimary(LocalContext.current, Colors.recordTriggerButton.toArgb())
+        MaterialColors.harmonizeWithPrimary(
+            LocalContext.current,
+            Colors.recordTriggerButton.toArgb()
+        )
 
     val harmonizedRedColor = Color(harmonizedRedColorInt)
 
@@ -102,7 +228,10 @@ private fun RecordTriggerButton(modifier: Modifier = Modifier, onClick: () -> Un
     )
 
     val text = when (state) {
-        is RecordTriggerState.CountingDown -> stringResource(R.string.config_trigger_record_countdown_button_text, state.timeLeft)
+        is RecordTriggerState.CountingDown -> stringResource(
+            R.string.config_trigger_record_countdown_button_text,
+            state.timeLeft
+        )
         RecordTriggerState.Stopped -> stringResource(R.string.config_trigger_record_button)
     }
 
@@ -114,7 +243,11 @@ private fun RecordTriggerButton(modifier: Modifier = Modifier, onClick: () -> Un
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun ErrorList(modifier: Modifier = Modifier, errors: List<KeyMapTriggerError>, onFixClick: (KeyMapTriggerError) -> Unit) {
+private fun ErrorList(
+    modifier: Modifier = Modifier,
+    errors: List<KeyMapTriggerError>,
+    onFixClick: (KeyMapTriggerError) -> Unit,
+) {
     LazyColumn(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         items(errors, key = { item -> item }) { error ->
             val textRes = when (error) {
@@ -138,15 +271,26 @@ private fun ErrorList(modifier: Modifier = Modifier, errors: List<KeyMapTriggerE
 private fun ErrorListItem(modifier: Modifier = Modifier, text: String, onFixClick: () -> Unit) {
     OutlinedCard(modifier = modifier) {
         Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
-            Icon(imageVector = Icons.Outlined.ErrorOutline, contentDescription = null, tint = MaterialTheme.colorScheme.error)
+            Icon(
+                imageVector = Icons.Outlined.ErrorOutline,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.error
+            )
 
             Spacer(Modifier.width(8.dp))
 
-            Text(modifier = Modifier.weight(1f), text = text, style = MaterialTheme.typography.bodyMedium)
+            Text(
+                modifier = Modifier.weight(1f),
+                text = text,
+                style = MaterialTheme.typography.bodyMedium
+            )
 
             Spacer(Modifier.width(8.dp))
 
-            val buttonColors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error, contentColor = MaterialTheme.colorScheme.onError)
+            val buttonColors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.error,
+                contentColor = MaterialTheme.colorScheme.onError
+            )
 
             Button(
                 onClick = onFixClick,
@@ -169,7 +313,10 @@ private fun KeyList(
     val scope = rememberCoroutineScope()
     val showDragHandle = keys.size > 1
 
-    LazyColumn(modifier = modifier.dragAndDrop(dragDropState, scope), state = dragDropState.lazyListState) {
+    LazyColumn(
+        modifier = modifier.dragAndDrop(dragDropState, scope),
+        state = dragDropState.lazyListState
+    ) {
         itemsIndexed(items = keys, key = { _, item -> item.uid }) { index, item ->
             TriggerKeyListItem(
                 modifier = Modifier.dragAndDropItemAnimation(index, dragDropState),
@@ -177,7 +324,8 @@ private fun KeyList(
                 extraInfo = item.extraInfo,
                 linkType = item.linkType,
                 onRemoveClick = { onRemoveClick(item.uid) },
-                showDragHandle = showDragHandle)
+                showDragHandle = showDragHandle
+            )
         }
     }
 }
@@ -205,7 +353,11 @@ private fun Preview() {
                         ),
                     ),
                     recordTriggerState = RecordTriggerState.Stopped,
-                    errors = listOf(KeyMapTriggerError.SCREEN_OFF_ROOT_DENIED, KeyMapTriggerError.DND_ACCESS_DENIED)
+                    errors = listOf(
+                        KeyMapTriggerError.SCREEN_OFF_ROOT_DENIED,
+                        KeyMapTriggerError.DND_ACCESS_DENIED
+                    ),
+                    mode = TriggerMode.Parallel(ClickType.SHORT_PRESS)
                 )
             )
         }
@@ -219,7 +371,11 @@ private fun PreviewEmpty() {
         Surface {
             ConfigTriggerScreen(
                 modifier = Modifier.fillMaxSize(),
-                configState = ConfigTriggerState(recordTriggerState = RecordTriggerState.CountingDown(timeLeft = 3))
+                configState = ConfigTriggerState(
+                    recordTriggerState = RecordTriggerState.CountingDown(
+                        timeLeft = 3
+                    )
+                )
             )
         }
     }

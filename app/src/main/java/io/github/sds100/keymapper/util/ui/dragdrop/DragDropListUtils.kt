@@ -9,11 +9,3 @@ fun LazyListState.getVisibleItemInfoFor(absolute: Int): LazyListItemInfo? {
 
 val LazyListItemInfo.offsetEnd: Int
     get() = this.offset + this.size
-
-fun <T> MutableList<T>.move(from: Int, to: Int) {
-    if (from == to)
-        return
-
-    val element = this.removeAt(from) ?: return
-    this.add(to, element)
-}

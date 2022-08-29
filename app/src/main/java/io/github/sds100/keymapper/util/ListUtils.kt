@@ -1,21 +1,15 @@
 package io.github.sds100.keymapper.util
 
-import java.util.*
-
 /**
  * Created by sds100 on 11/03/2021.
  */
 
-fun MutableList<*>.moveElement(fromIndex: Int, toIndex: Int) {
-    if (fromIndex < toIndex) {
-        for (i in fromIndex until toIndex) {
-            Collections.swap(this, i, i + 1)
-        }
-    } else {
-        for (i in fromIndex downTo toIndex + 1) {
-            Collections.swap(this, i, i - 1)
-        }
-    }
+fun <T> MutableList<T>.move(from: Int, to: Int) {
+    if (from == to)
+        return
+
+    val element = this.removeAt(from) ?: return
+    this.add(to, element)
 }
 
 inline fun <reified T> Array<out T>.splitIntoBatches(batchSize: Int): Array<Array<out T>> {

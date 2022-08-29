@@ -1,15 +1,14 @@
 package io.github.sds100.keymapper.util.ui
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
@@ -24,10 +23,17 @@ fun SwitchWithText(
     text: @Composable () -> Unit,
     onChange: (Boolean) -> Unit = {},
 ) {
-    Row(modifier, verticalAlignment = Alignment.CenterVertically) {
+    Row(
+        modifier = modifier
+            .clip(ShapeDefaults.Medium)
+            .clickable { onChange(!checked) },
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Spacer(Modifier.width(8.dp))
         text()
         Spacer(Modifier.width(8.dp))
         Switch(checked = checked, onCheckedChange = onChange)
+        Spacer(Modifier.width(8.dp))
     }
 }
 

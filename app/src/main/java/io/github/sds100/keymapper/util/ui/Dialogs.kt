@@ -19,23 +19,28 @@ fun CustomDialog(
     confirmButton: @Composable () -> Unit,
     dismissButton: @Composable () -> Unit,
     onDismissRequest: () -> Unit = {},
-    content: @Composable BoxScope.() -> Unit
+    content: @Composable BoxScope.() -> Unit,
 ) {
-    Dialog(onDismissRequest = onDismissRequest,
+    Dialog(
+        onDismissRequest = onDismissRequest,
         //must be set false so that the dialog resizes when content changes
-        properties = DialogProperties(usePlatformDefaultWidth = false)) {
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
         Surface(
             modifier = Modifier.padding(50.dp),
-            color = MaterialTheme.colorScheme.surface, shape = MaterialTheme.shapes.extraLarge) {
+            color = MaterialTheme.colorScheme.surface, shape = MaterialTheme.shapes.extraLarge
+        ) {
             Column(Modifier.padding(24.dp)) {
                 Text(
                     modifier = Modifier.wrapContentSize(),
                     text = title,
                     style = MaterialTheme.typography.headlineSmall
                 )
-                Box(Modifier
-                    .weight(1f, fill = false)
-                    .padding(top = 16.dp)) {
+                Box(
+                    Modifier
+                        .weight(1f, fill = false)
+                        .padding(top = 16.dp)
+                ) {
                     content()
                 }
                 Row(
@@ -74,14 +79,14 @@ private fun Preview() {
                     RadioButtonWithText(
                         modifier = Modifier.fillMaxWidth(),
                         isSelected = true,
-                        text = "Button 1"
+                        text = { Text("Button 1") }
                     )
                 }
                 item {
                     RadioButtonWithText(
                         modifier = Modifier.fillMaxWidth(),
                         isSelected = false,
-                        text = "Button 2"
+                        text = { Text("Button 2") }
                     )
                 }
             }

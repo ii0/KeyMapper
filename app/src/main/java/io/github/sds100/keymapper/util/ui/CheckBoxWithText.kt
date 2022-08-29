@@ -6,6 +6,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
 
 /**
@@ -19,7 +20,12 @@ fun CheckBoxWithText(
     text: @Composable () -> Unit,
     onCheckedChange: (Boolean) -> Unit = {}
 ) {
-    Row(modifier.clickable { onCheckedChange(!isChecked) }, verticalAlignment = Alignment.CenterVertically) {
+    Row(
+        modifier
+            .clip(ShapeDefaults.Medium)
+            .clickable { onCheckedChange(!isChecked) },
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         Checkbox(checked = isChecked, onCheckedChange = onCheckedChange)
         text()
     }

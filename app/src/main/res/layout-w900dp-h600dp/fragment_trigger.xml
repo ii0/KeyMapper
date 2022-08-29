@@ -117,7 +117,7 @@
             android:layout_height="wrap_content"
             android:enabled="@{viewModel.triggerModeButtonsEnabled}"
             android:paddingTop="8dp"
-            android:text="@string/press_dot_dot_dot"
+            android:text="@string/config_trigger_press_dot_dot_dot"
             android:textAppearance="@style/TextAppearance.Material3.LabelMedium"
             app:layout_constraintBottom_toTopOf="@+id/radioGroupTriggerMode"
             app:layout_constraintStart_toStartOf="@id/radioGroupTriggerMode" />
@@ -142,7 +142,7 @@
                 android:onCheckedChanged="@{(view, isChecked) -> viewModel.onParallelRadioButtonCheckedChange(isChecked)}"
                 android:layout_weight="0.5"
                 android:enabled="@{viewModel.triggerModeButtonsEnabled}"
-                android:text="@string/radio_button_parallel" />
+                android:text="@string/config_trigger_parallel_mode_button" />
 
             <com.google.android.material.radiobutton.MaterialRadioButton
                 android:id="@+id/radioButtonSequence"
@@ -151,7 +151,7 @@
                 android:layout_height="match_parent"
                 android:layout_weight="0.5"
                 android:enabled="@{viewModel.triggerModeButtonsEnabled}"
-                android:text="@string/radio_button_sequence" />
+                android:text="@string/config_trigger_sequence_mode_button" />
 
 
             <com.google.android.material.radiobutton.MaterialRadioButton
@@ -159,7 +159,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="0.5"
-                android:text="@string/radio_button_sequence"
+                android:text="@string/config_trigger_sequence_mode_button"
                 android:visibility="gone" />
         </RadioGroup>
 

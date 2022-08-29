@@ -29,16 +29,16 @@ fun ConfigKeyMapNavHost(
 ) {
     DestinationsNavHost(modifier = modifier, navGraph = NavGraphs.root) {
         composable(ConfigKeyMapScreenDestination) {
-            val triggerViewModel: ConfigKeyMapViewModel2 = hiltViewModel()
+            val viewModel: ConfigKeyMapViewModel2 = hiltViewModel()
 
             if (keyMapUid == null) {
-                triggerViewModel.loadNewKeyMap()
+                viewModel.loadNewKeyMap()
             } else {
-                triggerViewModel.loadKeyMap(keyMapUid)
+                viewModel.loadKeyMap(keyMapUid)
             }
 
             ConfigKeyMapScreen(
-                viewModel = triggerViewModel,
+                viewModel = viewModel,
                 navigateBack = navigateBack
             )
         }

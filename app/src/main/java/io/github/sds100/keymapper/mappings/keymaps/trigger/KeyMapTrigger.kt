@@ -26,7 +26,7 @@ data class KeyMapTrigger(
     val vibrateDuration: Int? = null,
     val sequenceTriggerTimeout: Int? = null,
     val triggerFromOtherApps: Boolean = false,
-    val showToast: Boolean = false
+    val showToast: Boolean = false,
 ) {
     fun isVibrateAllowed(): Boolean {
         return true
@@ -50,24 +50,33 @@ data class KeyMapTrigger(
     }
 
     fun isDetectingWhenScreenOffAllowed(): Boolean {
-        return keys.isNotEmpty() && keys.all { DetectScreenOffKeyEventsController.canDetectKeyWhenScreenOff(it.keyCode) }
+        return keys.isNotEmpty() && keys.all {
+            DetectScreenOffKeyEventsController.canDetectKeyWhenScreenOff(
+                it.keyCode
+            )
+        }
     }
 
     fun isChangingSequenceTriggerTimeoutAllowed(): Boolean {
-        return !keys.isNullOrEmpty() && keys.size > 1 && mode is TriggerMode.Sequence
+        return keys.isNotEmpty() && keys.size > 1 && mode is TriggerMode.Sequence
     }
 }
 
 object KeymapTriggerEntityMapper {
     fun fromEntity(
-        entity: TriggerEntity
+        entity: TriggerEntity,
     ): KeyMapTrigger {
-        val keys = entity.keys.map { KeymapTriggerKeyEntityMapper.fromEntity(it) }
+        var keys = entity.keys.map { KeymapTriggerKeyEntityMapper.fromEntity(it) }
 
         val mode = when {
             entity.mode == TriggerEntity.SEQUENCE && keys.size > 1 -> TriggerMode.Sequence
             entity.mode == TriggerEntity.PARALLEL && keys.size > 1 -> TriggerMode.Parallel(keys[0].clickType)
             else -> TriggerMode.Undefined
+        }
+
+        // trigger key click types must be consistent
+        if (mode is TriggerMode.Parallel) {
+            keys = keys.map { it.copy(clickType = mode.clickType) }
         }
 
         return KeyMapTrigger(

@@ -157,15 +157,15 @@ private fun ConfigIntentScreen(
             FlowRow(modifier = Modifier.fillMaxWidth()) {
                 RadioButtonWithText(
                     isSelected = state.target == IntentTarget.ACTIVITY,
-                    text = stringResource(R.string.config_intent_screen_activity_target),
+                    text = { Text(stringResource(R.string.config_intent_screen_activity_target)) },
                     onClick = { onSelectIntentTarget(IntentTarget.ACTIVITY) })
                 RadioButtonWithText(
                     isSelected = state.target == IntentTarget.BROADCAST_RECEIVER,
-                    text = stringResource(R.string.config_intent_screen_broadcast_receiver_target),
+                    text = { Text(stringResource(R.string.config_intent_screen_broadcast_receiver_target)) },
                     onClick = { onSelectIntentTarget(IntentTarget.BROADCAST_RECEIVER) })
                 RadioButtonWithText(
                     isSelected = state.target == IntentTarget.SERVICE,
-                    text = stringResource(R.string.config_intent_screen_service_target),
+                    text = { Text(stringResource(R.string.config_intent_screen_service_target)) },
                     onClick = { onSelectIntentTarget(IntentTarget.SERVICE) })
             }
 
@@ -870,11 +870,11 @@ private fun EditBooleanExtraValue(modifier: Modifier = Modifier, value: Boolean,
     Row(modifier) {
         RadioButtonWithText(
             isSelected = value,
-            text = stringResource(R.string.config_intent_screen_extra_boolean_true),
+            text = { Text(stringResource(R.string.config_intent_screen_extra_boolean_true)) },
             onClick = { onChange(true) })
         RadioButtonWithText(
             isSelected = !value,
-            text = stringResource(R.string.config_intent_screen_extra_boolean_false),
+            text = { Text(stringResource(R.string.config_intent_screen_extra_boolean_false)) },
             onClick = { onChange(false) })
     }
 }

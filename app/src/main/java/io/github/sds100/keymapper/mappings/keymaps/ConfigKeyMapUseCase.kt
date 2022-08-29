@@ -29,7 +29,7 @@ import javax.inject.Singleton
 class ConfigKeyMapUseCaseImpl @Inject constructor(
     private val keyMapRepository: KeyMapRepository,
     private val devicesAdapter: DevicesAdapter,
-    private val preferenceRepository: PreferenceRepository
+    preferenceRepository: PreferenceRepository,
 ) : BaseConfigMappingUseCase<KeyMapAction, KeyMap>(), ConfigKeyMapUseCase {
 
     private val showDeviceDescriptors: Flow<Boolean> =
@@ -37,7 +37,7 @@ class ConfigKeyMapUseCaseImpl @Inject constructor(
 
     override fun addTriggerKey(
         keyCode: Int,
-        device: TriggerKeyDevice
+        device: TriggerKeyDevice,
     ) = editTrigger { trigger ->
         val clickType = when (trigger.mode) {
             is TriggerMode.Parallel -> trigger.mode.clickType
@@ -89,8 +89,17 @@ class ConfigKeyMapUseCaseImpl @Inject constructor(
 
             /* Automatically make it a parallel trigger when the user makes a trigger with more than one key
             because this is what most users are expecting when they make a trigger with multiple keys */
-            newKeys.size == 2 && !containsKey -> TriggerMode.Parallel(clickType)
+            newKeys.size == 2 -> TriggerMode.Parallel(clickType)
             else -> trigger.mode
+        }
+
+        // make sure the click types are consistent
+        if (newMode is TriggerMode.Parallel) {
+            newKeys.apply {
+                forEachIndexed { i, key ->
+                    set(i, key.copy(clickType = newMode.clickType))
+                }
+            }
         }
 
         trigger.copy(keys = newKeys, mode = newMode)
@@ -112,13 +121,15 @@ class ConfigKeyMapUseCaseImpl @Inject constructor(
     override fun moveTriggerKey(fromIndex: Int, toIndex: Int) = editTrigger { trigger ->
         trigger.copy(
             keys = trigger.keys.toMutableList().apply {
-                moveElement(fromIndex, toIndex)
+                move(fromIndex, toIndex)
             }
         )
     }
 
     override fun setParallelTriggerMode() = editTrigger { trigger ->
-        if (trigger.mode is TriggerMode.Parallel) return@editTrigger trigger
+        if (trigger.mode is TriggerMode.Parallel) {
+            return@editTrigger trigger
+        }
 
         //undefined mode only allowed if one or no keys
         if (trigger.keys.size <= 1) {
@@ -128,17 +139,14 @@ class ConfigKeyMapUseCaseImpl @Inject constructor(
         val oldKeys = trigger.keys
         var newKeys = oldKeys.toMutableList()
 
-        if (trigger.mode !is TriggerMode.Parallel) {
-            // set all the keys to a short press if coming from a non-parallel trigger
-            // because they must all be the same click type and can't all be double pressed
-            newKeys = newKeys.map { key ->
-                key.copy(clickType = ClickType.SHORT_PRESS)
-            }.toMutableList()
+        // set all the keys to a short press if coming from a non-parallel trigger
+        // because they must all be the same click type and can't all be double pressed
+        newKeys = newKeys.map { key ->
+            key.copy(clickType = ClickType.SHORT_PRESS)
+        }.toMutableList()
 
-            //remove duplicates of keys that have the same keycode and device id
-            newKeys =
-                newKeys.distinctBy { Pair(it.keyCode, it.device) }.toMutableList()
-        }
+        //remove duplicates of keys that have the same keycode and device id
+        newKeys = newKeys.distinctBy { Pair(it.keyCode, it.device) }.toMutableList()
 
         val newMode = if (newKeys.size <= 1) {
             TriggerMode.Undefined
@@ -365,7 +373,7 @@ class ConfigKeyMapUseCaseImpl @Inject constructor(
                 repeat = true
             }
         }
-        
+
         if (data is ActionData.AnswerCall) {
             addConstraint(Constraint.PhoneRinging)
         }
@@ -416,7 +424,7 @@ class ConfigKeyMapUseCaseImpl @Inject constructor(
 
     private fun setActionOption(
         uid: String,
-        block: (action: KeyMapAction) -> KeyMapAction
+        block: (action: KeyMapAction) -> KeyMapAction,
     ) {
         editKeyMap { keyMap ->
             val newActionList = keyMap.actionList.map { action ->

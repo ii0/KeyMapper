@@ -16,7 +16,7 @@
     <string name="your_device_doesnt_support_some_actions">Twoje urządzenie nie obsługuje niektórych działań.</string>
     <string name="tab_unsupported_actions">Nieobsługiwane działania</string>
     <string name="choose_action_warning_requires_root">Wymaga root</string>
-    <string name="press_dot_dot_dot">Naciśnij…</string>
+    <string name="config_trigger_press_dot_dot_dot">Naciśnij…</string>
     <string name="no_actions">Brak działań</string>
     <string name="no_trigger">Brak wyzwalacza</string>
     <string name="unknown_keycode">Nieznany kod klawisza: %s</string>
@@ -137,8 +137,8 @@
     <string name="hint_wifi_ssid">SSID sieci Wi-Fi</string>
     <!--  Hints  -->
     <!--  Radio buttons  -->
-    <string name="radio_button_parallel">Jednocześnie</string>
-    <string name="radio_button_sequence">Kolejno</string>
+    <string name="config_trigger_parallel_mode_button">Jednocześnie</string>
+    <string name="config_trigger_sequence_mode_button">Kolejno</string>
     <string name="radio_button_and">ORAZ</string>
     <string name="radio_button_or">LUB</string>
     <string name="radio_button_short_press">Krótkie naciśnięcie</string>

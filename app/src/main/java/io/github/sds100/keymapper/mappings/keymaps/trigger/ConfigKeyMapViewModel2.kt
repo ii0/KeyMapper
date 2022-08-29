@@ -18,7 +18,6 @@ import io.github.sds100.keymapper.system.permissions.Permission
 import io.github.sds100.keymapper.util.Error
 import io.github.sds100.keymapper.util.State
 import io.github.sds100.keymapper.util.ui.ResourceProvider
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -47,15 +46,22 @@ class ConfigKeyMapViewModel2 @Inject constructor(
             displayUseCase.invalidateTriggerErrors.onStart { emit(Unit) }
         ) { keyMap, recordState, _ ->
             val triggerErrors = displayUseCase.getTriggerErrors(keyMap)
+            val clickType = when (keyMap.trigger.mode) {
+                is TriggerMode.Parallel -> keyMap.trigger.mode.clickType
+                TriggerMode.Sequence -> null
+                TriggerMode.Undefined -> keyMap.trigger.keys.firstOrNull()?.clickType
+            }
 
             ConfigTriggerState(
                 keys = buildKeyListItems(keyMap.trigger),
                 recordTriggerState = recordState,
-                errors = triggerErrors
+                errors = triggerErrors,
+                mode = keyMap.trigger.mode,
+                isModeButtonsEnabled = keyMap.trigger.keys.size > 1,
+                clickType = clickType,
+                availableClickTypes = getAvailableClickTypes(keyMap.trigger)
             )
-        }
-            .flowOn(Dispatchers.Default)
-            .stateIn(viewModelScope, SharingStarted.Lazily, ConfigTriggerState())
+        }.stateIn(viewModelScope, SharingStarted.Lazily, ConfigTriggerState())
 
     var snackBar: ConfigKeyMapSnackbar by mutableStateOf(ConfigKeyMapSnackbar.NONE)
         private set
@@ -75,6 +81,8 @@ class ConfigKeyMapViewModel2 @Inject constructor(
 
     private val midDotString: String by lazy { resourceProvider.getString(R.string.middot) }
 
+    private var loaded: Boolean = false
+
     init {
         recordTriggerUseCase.onRecordKey.onEach {
             configUseCase.addTriggerKey(it.keyCode, it.device)
@@ -82,11 +90,17 @@ class ConfigKeyMapViewModel2 @Inject constructor(
     }
 
     fun onSaveClick() {
-        configUseCase.save()
+        if (!loaded) {
+            configUseCase.save()
+            loaded = true
+        }
     }
 
     fun loadNewKeyMap() {
-        configUseCase.loadNewKeyMap()
+        if (!loaded) {
+            configUseCase.loadNewKeyMap()
+            loaded = true
+        }
     }
 
     fun loadKeyMap(uid: String) {
@@ -94,7 +108,7 @@ class ConfigKeyMapViewModel2 @Inject constructor(
             configUseCase.loadKeyMap(uid)
         }
     }
-    
+
     fun onKeyMapEnabledChange(enabled: Boolean) {
         configUseCase.setEnabled(enabled)
     }
@@ -176,13 +190,29 @@ class ConfigKeyMapViewModel2 @Inject constructor(
             }
         }
     }
-    
+
     fun onMoveTriggerKey(from: Int, to: Int) {
         configUseCase.moveTriggerKey(from, to)
     }
 
     fun onRemoveTriggerKeyClick(uid: String) {
         configUseCase.removeTriggerKey(uid)
+    }
+
+    fun onSelectClickType(clickType: ClickType) {
+        when (clickType) {
+            ClickType.SHORT_PRESS -> configUseCase.setTriggerShortPress()
+            ClickType.LONG_PRESS -> configUseCase.setTriggerLongPress()
+            ClickType.DOUBLE_PRESS -> configUseCase.setTriggerDoublePress()
+        }
+    }
+
+    fun onSelectParallelTriggerMode() {
+        configUseCase.setParallelTriggerMode()
+    }
+
+    fun onSelectSequenceTriggerMode() {
+        configUseCase.setSequenceTriggerMode()
     }
 
     private fun buildKeyListItems(trigger: KeyMapTrigger): List<TriggerKeyListItem2> {
@@ -250,6 +280,23 @@ class ConfigKeyMapViewModel2 @Inject constructor(
             }
         }
     }
+
+    private fun getAvailableClickTypes(trigger: KeyMapTrigger): List<ClickType> {
+        when (trigger.mode) {
+            is TriggerMode.Parallel -> return listOf(
+                ClickType.SHORT_PRESS,
+                ClickType.LONG_PRESS
+            )
+            TriggerMode.Sequence -> return emptyList()
+            TriggerMode.Undefined -> {
+                return listOf(
+                    ClickType.SHORT_PRESS,
+                    ClickType.LONG_PRESS,
+                    ClickType.DOUBLE_PRESS
+                )
+            }
+        }
+    }
 }
 
 sealed class ConfigKeyMapDialog {
@@ -266,4 +313,8 @@ data class ConfigTriggerState(
     val keys: List<TriggerKeyListItem2> = emptyList(),
     val recordTriggerState: RecordTriggerState = RecordTriggerState.Stopped,
     val errors: List<KeyMapTriggerError> = emptyList(),
+    val mode: TriggerMode = TriggerMode.Undefined,
+    val isModeButtonsEnabled: Boolean = false,
+    val clickType: ClickType? = null,
+    val availableClickTypes: List<ClickType> = emptyList(),
 )

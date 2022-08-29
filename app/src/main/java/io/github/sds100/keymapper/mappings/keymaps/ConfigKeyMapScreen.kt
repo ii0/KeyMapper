@@ -1,10 +1,7 @@
 package io.github.sds100.keymapper.mappings.keymaps
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.HelpOutline
@@ -58,10 +55,12 @@ fun ConfigKeyMapScreen(
         onDismissDialog = viewModel::onDismissDialog,
         triggerScreen = {
             ConfigTriggerScreen(
+                modifier = Modifier.fillMaxHeight(),
                 configState = triggerState,
                 onRecordTriggerClick = viewModel::onRecordTriggerClick,
                 onRemoveTriggerKeyClick = viewModel::onRemoveTriggerKeyClick,
-                onFixTriggerErrorClick = viewModel::onFixTriggerErrorClick
+                onFixTriggerErrorClick = viewModel::onFixTriggerErrorClick,
+                onMoveTriggerKey = viewModel::onMoveTriggerKey
             )
         },
         onConfirmDndAccessErrorClick = viewModel::onConfirmDndAccessExplanationClick,

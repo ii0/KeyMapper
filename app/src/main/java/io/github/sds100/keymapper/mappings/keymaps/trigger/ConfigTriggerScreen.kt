@@ -33,6 +33,7 @@ fun ConfigTriggerScreen(
     onRecordTriggerClick: () -> Unit = {},
     onRemoveTriggerKeyClick: (String) -> Unit = {},
     onFixTriggerErrorClick: (KeyMapTriggerError) -> Unit = {},
+    onMoveTriggerKey: (from: Int, to: Int) -> Unit = { _, _ -> },
 ) {
     Column(modifier) {
         if (configState.keys.isEmpty()) {
@@ -47,7 +48,8 @@ fun ConfigTriggerScreen(
                     .weight(1f),
                 state = configState,
                 onRemoveTriggerKeyClick = onRemoveTriggerKeyClick,
-                onFixErrorClick = onFixTriggerErrorClick)
+                onFixErrorClick = onFixTriggerErrorClick,
+                onMoveKey = onMoveTriggerKey)
         }
 
         RecordTriggerButton(
@@ -66,11 +68,12 @@ private fun TriggerUi(
     state: ConfigTriggerState,
     onRemoveTriggerKeyClick: (String) -> Unit,
     onFixErrorClick: (KeyMapTriggerError) -> Unit,
+    onMoveKey: (from: Int, to: Int) -> Unit,
 ) {
     Column(modifier) {
         ErrorList(modifier = Modifier.wrapContentHeight(), errors = state.errors, onFixClick = onFixErrorClick)
         Spacer(Modifier.height(8.dp))
-        KeyList(modifier = Modifier, keys = state.keys, onRemoveClick = onRemoveTriggerKeyClick)
+        KeyList(modifier = Modifier.fillMaxSize(), keys = state.keys, onRemoveClick = onRemoveTriggerKeyClick, onMove = onMoveKey)
     }
 }
 
@@ -159,9 +162,10 @@ private fun ErrorListItem(modifier: Modifier = Modifier, text: String, onFixClic
 private fun KeyList(
     modifier: Modifier = Modifier,
     keys: List<TriggerKeyListItem2>,
+    onMove: (from: Int, to: Int) -> Unit,
     onRemoveClick: (String) -> Unit,
 ) {
-    val dragDropState = rememberDragDropListState(onMove = { from, to -> })
+    val dragDropState = rememberDragDropListState(onMove = onMove)
     val scope = rememberCoroutineScope()
     val showDragHandle = keys.size > 1
 

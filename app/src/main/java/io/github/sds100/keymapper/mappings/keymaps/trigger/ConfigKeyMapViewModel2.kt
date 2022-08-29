@@ -176,6 +176,10 @@ class ConfigKeyMapViewModel2 @Inject constructor(
             }
         }
     }
+    
+    fun onMoveTriggerKey(from: Int, to: Int) {
+        configUseCase.moveTriggerKey(from, to)
+    }
 
     fun onRemoveTriggerKeyClick(uid: String) {
         configUseCase.removeTriggerKey(uid)

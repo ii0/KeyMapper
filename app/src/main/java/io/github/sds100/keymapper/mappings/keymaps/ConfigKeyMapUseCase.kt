@@ -225,6 +225,12 @@ class ConfigKeyMapUseCaseImpl @Inject constructor(
     }
 
     override fun setTriggerKeyClickType(keyUid: String, clickType: ClickType) {
+        mapping.value.ifIsData { keyMap ->
+            if (keyMap.trigger.mode !is TriggerMode.Sequence) {
+                return
+            }
+        }
+
         editTriggerKey(keyUid) {
             it.copy(clickType = clickType)
         }

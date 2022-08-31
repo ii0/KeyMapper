@@ -801,7 +801,6 @@
 
     <string name="flag_hold_down">Hold down</string>
     <string name="flag_hold_down_until_pressed_again">Hold down until pressed again</string>
-    <string name="flag_dont_override_default_action">Do not remap</string>
     <string name="flag_hold_down_until_swiped_again">Hold down until swiped again</string>
     <string name="flag_trigger_from_other_apps">Allow other apps to trigger this key map</string>
     <!--flags-->
@@ -1466,6 +1465,10 @@
     <string name="config_trigger_parallel_mode_button">At the same time</string>
     <string name="config_trigger_sequence_mode_button">In sequence</string>
     <string name="config_trigger_press_dot_dot_dot">Press…</string>
+    <string name="config_trigger_key_done_button">Done</string>
+    <string name="config_trigger_key_help_button">Help</string>
+    <string name="config_trigger_key_do_not_remap_checkbox">Do not remap</string>
+    <string name="config_trigger_key_do_not_remap_caption">"This will make the key still do its default behavior even though you have assigned it an action in Key Mapper. This is useful for modifier keys (Ctrl, Shift etc) for example."</string>
 
     <!-- Config trigger screen -->
 </resources>

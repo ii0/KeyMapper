@@ -586,7 +586,7 @@ Pokud by měla být spárována nějaká WiFi síť, nechte ji prázdnou.</strin
     <string name="flag_repeat_actions_pressed_again">Opakovat dokud není znovu stisknuto</string>
     <string name="flag_hold_down">Podržet</string>
     <string name="flag_hold_down_until_pressed_again">Držet dokud není znovu stisknuto</string>
-    <string name="flag_dont_override_default_action">Nepřepsat výchozí akci</string>
+    <string name="config_trigger_key_do_not_remap_checkbox">Nepřepsat výchozí akci</string>
     <string name="flag_hold_down_until_swiped_again">Podrž dolů, dokud se znovu nepotáhne</string>
     <string name="flag_trigger_from_other_apps">Spouštěč z jiných aplikací</string>
     <!--flags-->

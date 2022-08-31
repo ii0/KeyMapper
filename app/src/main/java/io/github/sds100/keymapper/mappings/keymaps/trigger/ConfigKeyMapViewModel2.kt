@@ -84,6 +84,29 @@ class ConfigKeyMapViewModel2 @Inject constructor(
 
     private var loaded: Boolean = false
 
+    /**
+     * The uid of the trigger key being edited.
+     */
+    private var triggerKeyUid: MutableStateFlow<String?> = MutableStateFlow(null)
+
+    val triggerKeyState: StateFlow<ConfigTriggerKeyState> = combine(
+        keyMapFlow,
+        triggerKeyUid
+    ) { keyMap, keyUid ->
+        if (keyUid == null) {
+            return@combine ConfigTriggerKeyState()
+        }
+
+        val triggerKey = keyMap.trigger.keys.singleOrNull { it.uid == keyUid }
+            ?: return@combine ConfigTriggerKeyState()
+
+        ConfigTriggerKeyState(
+            isDoNotRemapChecked = !triggerKey.consumeKeyEvent,
+            clickType = triggerKey.clickType,
+            showClickTypeButtons = keyMap.trigger.mode is TriggerMode.Sequence
+        )
+    }.stateIn(viewModelScope, SharingStarted.Lazily, ConfigTriggerKeyState())
+
     init {
         recordTriggerUseCase.onRecordKey.onEach {
             configUseCase.addTriggerKey(it.keyCode, it.device)
@@ -246,6 +269,18 @@ class ConfigKeyMapViewModel2 @Inject constructor(
         )
     }
 
+    fun onLaunchTriggerKeyOptions(uid: String) {
+        triggerKeyUid.value = uid
+    }
+
+    fun onDoNotRemapKeyCheckedChange(checked: Boolean) {
+        configUseCase.setTriggerKeyConsumeKeyEvent(triggerKeyUid.value!!, !checked)
+    }
+
+    fun onSelectKeyClickType(clickType: ClickType) {
+        configUseCase.setTriggerKeyClickType(triggerKeyUid.value!!, clickType)
+    }
+
     private fun buildKeyListItems(trigger: KeyMapTrigger): List<TriggerKeyListItem2> {
         return trigger.keys.mapIndexed { index, key ->
             val linkType = if (index == trigger.keys.lastIndex) {
@@ -272,7 +307,7 @@ class ConfigKeyMapViewModel2 @Inject constructor(
             append(deviceName)
 
             if (!key.consumeKeyEvent) {
-                append(" $midDotString ${resourceProvider.getString(R.string.flag_dont_override_default_action)}")
+                append(" $midDotString ${resourceProvider.getString(R.string.config_trigger_key_do_not_remap_checkbox)}")
             }
         }
     }
@@ -354,4 +389,10 @@ data class ConfigTriggerState(
     val isModeButtonsEnabled: Boolean = false,
     val clickType: ClickType? = null,
     val availableClickTypes: List<ClickType> = emptyList(),
+)
+
+data class ConfigTriggerKeyState(
+    val isDoNotRemapChecked: Boolean = false,
+    val clickType: ClickType = ClickType.SHORT_PRESS,
+    val showClickTypeButtons: Boolean = false,
 )

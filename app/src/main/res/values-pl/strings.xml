@@ -624,7 +624,7 @@
     <string name="flag_repeat_actions_pressed_again">Powtarzaj aż do ponownego naciśnięcia</string>
     <string name="flag_hold_down">Przytrzymaj</string>
     <string name="flag_hold_down_until_pressed_again">Przytrzymaj do ponownego naciśnięcia</string>
-    <string name="flag_dont_override_default_action">Nie zastępuj domyślnej funkcji</string>
+    <string name="config_trigger_key_do_not_remap_checkbox">Nie zastępuj domyślnej funkcji</string>
     <string name="flag_hold_down_until_swiped_again">Przytrzymaj do ponownego przeciągnięcia</string>
     <string name="flag_trigger_from_other_apps">Zezwalaj innym aplikacjom na wyzwalanie tej mapy klawiszy</string>
     <!--flags-->

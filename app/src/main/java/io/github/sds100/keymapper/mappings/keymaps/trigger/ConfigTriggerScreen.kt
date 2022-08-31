@@ -40,6 +40,7 @@ fun ConfigTriggerScreen(
     onSelectParallelTriggerMode: () -> Unit = {},
     onSelectSequenceTriggerMode: () -> Unit = {},
     onChooseTriggerKeyDeviceClick: (String) -> Unit = {},
+    onTriggerKeyOptionsClick: (String) -> Unit = {},
 ) {
     Column(modifier) {
         if (configState.keys.isEmpty()) {
@@ -61,7 +62,8 @@ fun ConfigTriggerScreen(
                 onSelectClickType = onSelectClickType,
                 onSelectParallelMode = onSelectParallelTriggerMode,
                 onSelectSequenceMode = onSelectSequenceTriggerMode,
-                onChooseTriggerKeyDeviceClick = onChooseTriggerKeyDeviceClick
+                onChooseTriggerKeyDeviceClick = onChooseTriggerKeyDeviceClick,
+                onTriggerKeyOptionsClick = onTriggerKeyOptionsClick
             )
         }
 
@@ -86,6 +88,7 @@ private fun TriggerUi(
     onSelectParallelMode: () -> Unit,
     onSelectSequenceMode: () -> Unit,
     onChooseTriggerKeyDeviceClick: (String) -> Unit,
+    onTriggerKeyOptionsClick: (String) -> Unit,
 ) {
     Column(modifier) {
         if (state.errors.isNotEmpty()) {
@@ -102,7 +105,8 @@ private fun TriggerUi(
             keys = state.keys,
             onRemoveClick = onRemoveTriggerKeyClick,
             onMove = onMoveKey,
-            onChooseDeviceClick = onChooseTriggerKeyDeviceClick
+            onChooseDeviceClick = onChooseTriggerKeyDeviceClick,
+            onOptionsClick = onTriggerKeyOptionsClick
         )
         if (state.availableClickTypes.isNotEmpty() && state.clickType != null) {
             ClickTypeButtons(
@@ -188,13 +192,13 @@ private val clickTypeButtonText: Map<ClickType, Int> = mapOf(
 )
 
 @Composable
-private fun ClickTypeButtons(
+fun ClickTypeButtons(
     modifier: Modifier,
     clickType: ClickType,
     availableButtons: List<ClickType>,
     onSelect: (ClickType) -> Unit,
 ) {
-    Row(modifier, horizontalArrangement = Arrangement.SpaceBetween) {
+    Row(modifier) {
         availableButtons.forEach { button ->
             RadioButtonWithText(
                 modifier = Modifier.weight(1f),
@@ -311,6 +315,7 @@ private fun KeyList(
     onMove: (from: Int, to: Int) -> Unit,
     onRemoveClick: (String) -> Unit,
     onChooseDeviceClick: (String) -> Unit,
+    onOptionsClick: (String) -> Unit,
 ) {
     val dragDropState = rememberDragDropListState(onMove = onMove)
     val scope = rememberCoroutineScope()
@@ -328,7 +333,8 @@ private fun KeyList(
                 linkType = item.linkType,
                 onRemoveClick = { onRemoveClick(item.uid) },
                 showDragHandle = showDragHandle,
-                onDevicesClick = { onChooseDeviceClick(item.uid) }
+                onDevicesClick = { onChooseDeviceClick(item.uid) },
+                onOptionsClick = { onOptionsClick(item.uid) }
             )
         }
     }

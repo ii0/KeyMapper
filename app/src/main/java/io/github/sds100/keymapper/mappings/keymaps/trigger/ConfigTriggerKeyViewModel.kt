@@ -1,6 +1,5 @@
 package io.github.sds100.keymapper.mappings.keymaps.trigger
 
-import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.sds100.keymapper.R
 import io.github.sds100.keymapper.mappings.ClickType
 import io.github.sds100.keymapper.mappings.DefaultOptionsUiState
@@ -87,7 +86,7 @@ class ConfigTriggerKeyViewModel @Inject constructor(
                 CheckBoxListItem(
                     id = ID_DONT_CONSUME_KEY_EVENT,
                     isChecked = !key.consumeKeyEvent,
-                    label = getString(R.string.flag_dont_override_default_action)
+                    label = getString(R.string.config_trigger_key_do_not_remap_checkbox)
                 )
             )
 

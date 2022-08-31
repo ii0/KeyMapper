@@ -25,7 +25,9 @@ import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootNavGraph
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import io.github.sds100.keymapper.R
+import io.github.sds100.keymapper.destinations.ConfigTriggerKeyScreenDestination
 import io.github.sds100.keymapper.mappings.keymaps.trigger.*
 import io.github.sds100.keymapper.util.ui.CustomDialog
 import io.github.sds100.keymapper.util.ui.RadioButtonWithText
@@ -39,6 +41,7 @@ import kotlinx.coroutines.launch
 fun ConfigKeyMapScreen(
     modifier: Modifier = Modifier,
     viewModel: ConfigKeyMapViewModel2,
+    navigator: DestinationsNavigator,
     navigateBack: () -> Unit,
 ) {
     val triggerState by viewModel.triggerState.collectAsState()
@@ -68,7 +71,11 @@ fun ConfigKeyMapScreen(
                 onSelectClickType = viewModel::onSelectClickType,
                 onSelectParallelTriggerMode = viewModel::onSelectParallelTriggerMode,
                 onSelectSequenceTriggerMode = viewModel::onSelectSequenceTriggerMode,
-                onChooseTriggerKeyDeviceClick = viewModel::onChooseTriggerKeyDeviceClick
+                onChooseTriggerKeyDeviceClick = viewModel::onChooseTriggerKeyDeviceClick,
+                onTriggerKeyOptionsClick = { keyUid ->
+                    navigator.navigate(ConfigTriggerKeyScreenDestination)
+                    viewModel.onLaunchTriggerKeyOptions(keyUid)
+                }
             )
         },
         onConfirmDialog = viewModel::onConfirmDialog,

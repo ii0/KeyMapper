@@ -72,7 +72,7 @@ class KeyMapListItemCreator(
                 append(deviceName)
 
                 if (!key.consumeKeyEvent) {
-                    append(" $midDot ${getString(R.string.flag_dont_override_default_action)}")
+                    append(" $midDot ${getString(R.string.config_trigger_key_do_not_remap_checkbox)}")
                 }
 
                 append(")")

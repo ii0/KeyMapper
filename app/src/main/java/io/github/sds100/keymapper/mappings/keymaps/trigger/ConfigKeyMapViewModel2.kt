@@ -8,16 +8,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.sds100.keymapper.R
+import io.github.sds100.keymapper.actions.ActionData
 import io.github.sds100.keymapper.mappings.ClickType
-import io.github.sds100.keymapper.mappings.keymaps.ConfigKeyMapUseCase
-import io.github.sds100.keymapper.mappings.keymaps.DisplayKeyMapUseCase
-import io.github.sds100.keymapper.mappings.keymaps.KeyMap
+import io.github.sds100.keymapper.mappings.keymaps.*
 import io.github.sds100.keymapper.system.devices.InputDeviceUtils
 import io.github.sds100.keymapper.system.keyevents.KeyEventUtils
 import io.github.sds100.keymapper.system.permissions.Permission
 import io.github.sds100.keymapper.util.Error
 import io.github.sds100.keymapper.util.State
 import io.github.sds100.keymapper.util.firstBlocking
+import io.github.sds100.keymapper.util.ui.KMIcon
 import io.github.sds100.keymapper.util.ui.ResourceProvider
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -30,6 +30,11 @@ class ConfigKeyMapViewModel2 @Inject constructor(
     private val recordTriggerUseCase: RecordTriggerUseCase,
     private val resourceProvider: ResourceProvider,
 ) : ViewModel() {
+    private val actionUiHelper: KeyMapActionUiHelper = KeyMapActionUiHelper(
+        displayUseCase,
+        resourceProvider
+    )
+
     private val recordTriggerState: StateFlow<RecordTriggerState> = recordTriggerUseCase.state
         .stateIn(viewModelScope, SharingStarted.Lazily, RecordTriggerState.Stopped)
 
@@ -106,6 +111,12 @@ class ConfigKeyMapViewModel2 @Inject constructor(
             showClickTypeButtons = keyMap.trigger.mode is TriggerMode.Sequence
         )
     }.stateIn(viewModelScope, SharingStarted.Lazily, ConfigTriggerKeyState())
+
+    val actionsState: StateFlow<ConfigActionsState> =
+        combine(keyMapFlow,
+            displayUseCase.invalidateActionErrors.onStart { emit(Unit) }) { keyMap, _ ->
+            buildActionsState(keyMap)
+        }.stateIn(viewModelScope, SharingStarted.Lazily, ConfigActionsState())
 
     init {
         recordTriggerUseCase.onRecordKey.onEach {
@@ -281,6 +292,10 @@ class ConfigKeyMapViewModel2 @Inject constructor(
         configUseCase.setTriggerKeyClickType(triggerKeyUid.value!!, clickType)
     }
 
+    fun onCreateAction(action: ActionData) {
+        configUseCase.addAction(action)
+    }
+
     private fun buildKeyListItems(trigger: KeyMapTrigger): List<TriggerKeyListItem2> {
         return trigger.keys.mapIndexed { index, key ->
             val linkType = if (index == trigger.keys.lastIndex) {
@@ -363,6 +378,26 @@ class ConfigKeyMapViewModel2 @Inject constructor(
             }
         }
     }
+
+    private fun buildActionListItem(action: KeyMapAction): ConfigActionsListItem {
+        val actionChips = listOf(
+            ActionChip(
+                icon = actionUiHelper.getNewIcon(action.data),
+                title = actionUiHelper.getTitle(
+                    action.data,
+                    showDeviceDescriptors = showDeviceDescriptors.value
+                )
+            )
+        )
+
+        return ConfigActionsListItem(actions = actionChips)
+    }
+
+    private fun buildActionsState(keyMap: KeyMap): ConfigActionsState {
+        return ConfigActionsState(
+            listItems = keyMap.actionList.map { buildActionListItem(it) }
+        )
+    }
 }
 
 sealed class ConfigKeyMapDialog {
@@ -395,4 +430,17 @@ data class ConfigTriggerKeyState(
     val isDoNotRemapChecked: Boolean = false,
     val clickType: ClickType = ClickType.SHORT_PRESS,
     val showClickTypeButtons: Boolean = false,
+)
+
+data class ActionChip(
+    val icon: KMIcon,
+    val title: String,
+)
+
+data class ConfigActionsListItem(
+    val actions: List<ActionChip>,
+)
+
+data class ConfigActionsState(
+    val listItems: List<ConfigActionsListItem> = emptyList(),
 )

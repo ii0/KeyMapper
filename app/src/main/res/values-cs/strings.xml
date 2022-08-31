@@ -155,7 +155,7 @@
     <string name="tab_options">Možnosti</string>
     <string name="tab_constraints">Omezení</string>
     <string name="tab_actions">Akce</string>
-    <string name="tab_trigger">Spouštěč</string>
+    <string name="config_key_map_trigger_tab">Spouštěč</string>
     <string name="tab_fingerprint">Otisk prstu</string>
     <string-array name="home_tab_titles">
         <item>@string/tab_keyevents</item>
@@ -309,7 +309,7 @@ Pokud by měla být spárována nějaká WiFi síť, nechte ji prázdnou.</strin
     <string name="action_clear_log">Vyčistit</string>
     <!-- Menu action titles-->
     <!-- Button titles -->
-    <string name="button_add_action">Přidat akci</string>
+    <string name="config_actions_add_action_button">Přidat akci</string>
     <string name="config_trigger_record_button">Nahrát spouštěč</string>
     <string name="button_done">Hotovo</string>
     <string name="button_save">Uložit</string>

@@ -16,6 +16,7 @@ import io.github.sds100.keymapper.system.volume.VolumeStreamUtils
 import io.github.sds100.keymapper.util.Error
 import io.github.sds100.keymapper.util.handle
 import io.github.sds100.keymapper.util.ui.IconInfo
+import io.github.sds100.keymapper.util.ui.KMIcon
 import io.github.sds100.keymapper.util.ui.ResourceProvider
 import io.github.sds100.keymapper.util.ui.TintType
 import splitties.bitflags.hasFlag
@@ -26,7 +27,7 @@ import splitties.bitflags.hasFlag
 
 abstract class BaseActionUiHelper<MAPPING : Mapping<A>, A : Action>(
     displayActionUseCase: DisplayActionUseCase,
-    resourceProvider: ResourceProvider
+    resourceProvider: ResourceProvider,
 ) : ActionUiHelper<MAPPING, A>,
     ResourceProvider by resourceProvider,
     DisplayActionUseCase by displayActionUseCase {
@@ -135,11 +136,26 @@ abstract class BaseActionUiHelper<MAPPING : Mapping<A>, A : Action>(
                     val streamString = getString(VolumeStreamUtils.getLabel(action.volumeStream))
 
                     actionText = when (action) {
-                        is ActionData.Volume.Down -> getString(R.string.action_volume_down_stream, streamString)
-                        is ActionData.Volume.Mute -> getString(R.string.action_volume_mute_stream, streamString)
-                        is ActionData.Volume.ToggleMute -> getString(R.string.action_toggle_mute_stream, streamString)
-                        is ActionData.Volume.UnMute -> getString(R.string.action_volume_unmute_stream, streamString)
-                        is ActionData.Volume.Up -> getString(R.string.action_volume_up_stream, streamString)
+                        is ActionData.Volume.Down -> getString(
+                            R.string.action_volume_down_stream,
+                            streamString
+                        )
+                        is ActionData.Volume.Mute -> getString(
+                            R.string.action_volume_mute_stream,
+                            streamString
+                        )
+                        is ActionData.Volume.ToggleMute -> getString(
+                            R.string.action_toggle_mute_stream,
+                            streamString
+                        )
+                        is ActionData.Volume.UnMute -> getString(
+                            R.string.action_volume_unmute_stream,
+                            streamString
+                        )
+                        is ActionData.Volume.Up -> getString(
+                            R.string.action_volume_up_stream,
+                            streamString
+                        )
                     }
                 }
 
@@ -336,7 +352,7 @@ abstract class BaseActionUiHelper<MAPPING : Mapping<A>, A : Action>(
             ActionData.Wifi.Toggle -> getString(R.string.action_toggle_wifi)
             ActionData.DismissAllNotifications -> getString(R.string.action_dismiss_all_notifications)
             ActionData.DismissLastNotification -> getString(R.string.action_dismiss_most_recent_notification)
-            
+
             ActionData.AnswerCall -> getString(R.string.action_answer_call)
             ActionData.EndCall -> getString(R.string.action_end_call)
         }
@@ -386,6 +402,29 @@ abstract class BaseActionUiHelper<MAPPING : Mapping<A>, A : Action>(
                 getDrawable(iconRes),
                 TintType.OnSurface
             )
+        }
+    }
+
+    fun getNewIcon(action: ActionData): KMIcon {
+        when (action) {
+            is ActionData.App ->
+                return getAppIcon(action.packageName).handle(
+                    onSuccess = { KMIcon.Drawable(it) },
+                    onError = { ActionUtils.getNewIcon(ActionId.APP) }
+                )
+
+            is ActionData.AppShortcut -> {
+                if (action.packageName.isNullOrBlank()) {
+                    return ActionUtils.getNewIcon(ActionId.APP_SHORTCUT)
+                } else {
+                    return getAppIcon(action.packageName).handle(
+                        onSuccess = { KMIcon.Drawable(it) },
+                        onError = { ActionUtils.getNewIcon(ActionId.APP_SHORTCUT) }
+                    )
+                }
+            }
+
+            else -> return ActionUtils.getNewIcon(action.id)
         }
     }
 }

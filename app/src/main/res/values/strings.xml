@@ -166,7 +166,6 @@
     <string name="tab_options">Options</string>
     <string name="tab_constraints">Constraints</string>
     <string name="tab_actions">Actions</string>
-    <string name="tab_trigger">Trigger</string>
     <string name="tab_keyevents" translatable="false">Key events</string>
     <string name="tab_fingerprint">Fingerprint</string>
 
@@ -402,7 +401,6 @@
     <!-- Menu action titles-->
 
     <!-- Button titles -->
-    <string name="button_add_action">Add action</string>
     <string name="button_done">Done</string>
     <string name="button_save">Save</string>
     <string name="button_fix">Fix</string>
@@ -1453,6 +1451,8 @@
     <string name="config_key_map_discard_changes_dialog_title">Discard your changes</string>
     <string name="config_key_map_discard_changes_dialog_message">Are you sure you want to discard your changes?</string>
     <string name="config_key_map_save_button">Save</string>
+    <string name="config_key_map_trigger_tab">Trigger</string>
+    <string name="config_key_map_actions_and_constraints_tab">Actions and constraints</string>
     <!-- Config key map screen -->
 
     <!-- Config trigger screen -->
@@ -1469,6 +1469,11 @@
     <string name="config_trigger_key_help_button">Help</string>
     <string name="config_trigger_key_do_not_remap_checkbox">Do not remap</string>
     <string name="config_trigger_key_do_not_remap_caption">"This will make the key still do its default behavior even though you have assigned it an action in Key Mapper. This is useful for modifier keys (Ctrl, Shift etc) for example."</string>
-
     <!-- Config trigger screen -->
+
+    <!-- Config actions screen -->
+    <string name="config_actions_empty_text">Tap \'add action\' and choose an action that you want to happen when you trigger this key map.\n\nTap the help (?) button to learn more.</string>
+    <string name="config_actions_add_action_button">Add action</string>
+    <!-- Config actions screen -->
+
 </resources>

@@ -156,7 +156,7 @@
     <string name="tab_options">Opcje</string>
     <string name="tab_constraints">Ograniczenia</string>
     <string name="tab_actions">Działania</string>
-    <string name="tab_trigger">Wyzwalacz</string>
+    <string name="config_key_map_trigger_tab">Wyzwalacz</string>
     <string name="tab_fingerprint">Odcisk palca</string>
     <string-array name="home_tab_titles">
         <item>@string/tab_keyevents</item>
@@ -318,7 +318,7 @@
     <string name="action_clear_log">Wyczyść</string>
     <!-- Menu action titles-->
     <!-- Button titles -->
-    <string name="button_add_action">Dodaj działanie</string>
+    <string name="config_actions_add_action_button">Dodaj działanie</string>
     <string name="config_trigger_record_button">Wprowadź wyzwalacz</string>
     <string name="button_done">Gotowe</string>
     <string name="button_save">Zapisz</string>

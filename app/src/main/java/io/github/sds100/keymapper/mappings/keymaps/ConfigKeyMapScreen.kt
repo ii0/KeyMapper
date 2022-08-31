@@ -22,11 +22,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
+import com.google.accompanist.pager.PagerState
 import com.google.accompanist.pager.rememberPagerState
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootNavGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import com.ramcosta.composedestinations.result.NavResult
+import com.ramcosta.composedestinations.result.ResultRecipient
 import io.github.sds100.keymapper.R
+import io.github.sds100.keymapper.actions.ActionData
+import io.github.sds100.keymapper.actions.ConfigActionsScreen
+import io.github.sds100.keymapper.destinations.ChooseActionScreenDestination
 import io.github.sds100.keymapper.destinations.ConfigTriggerKeyScreenDestination
 import io.github.sds100.keymapper.mappings.keymaps.trigger.*
 import io.github.sds100.keymapper.util.ui.CustomDialog
@@ -43,9 +49,17 @@ fun ConfigKeyMapScreen(
     viewModel: ConfigKeyMapViewModel2,
     navigator: DestinationsNavigator,
     navigateBack: () -> Unit,
+    chooseActionResultRecipient: ResultRecipient<ChooseActionScreenDestination, ActionData>,
 ) {
     val triggerState by viewModel.triggerState.collectAsState()
+    val actionsState by viewModel.actionsState.collectAsState()
     val isKeyMapEnabled by viewModel.isKeyMapEnabled.collectAsState()
+
+    chooseActionResultRecipient.onNavResult { result ->
+        if (result is NavResult.Value) {
+            viewModel.onCreateAction(result.value)
+        }
+    }
 
     ConfigKeyMapScreen(
         modifier = modifier,
@@ -78,6 +92,11 @@ fun ConfigKeyMapScreen(
                 }
             )
         },
+        actionsScreen = {
+            ConfigActionsScreen(Modifier.fillMaxHeight(),
+                state = actionsState,
+                onAddActionClick = { navigator.navigate(ChooseActionScreenDestination) })
+        },
         onConfirmDialog = viewModel::onConfirmDialog,
         onNeverShowDndAccessErrorClick = viewModel::onNeverShowDndAccessErrorClick,
         onSelectTriggerKeyDevice = viewModel::onSelectTriggerKeyDevice
@@ -94,6 +113,7 @@ private fun ConfigKeyMapScreen(
     onKeyMapEnabledChange: (Boolean) -> Unit = {},
     navigateBack: () -> Unit = {},
     triggerScreen: @Composable () -> Unit = {},
+    actionsScreen: @Composable () -> Unit = {},
     onSaveClick: () -> Unit = {},
     onSnackbarClick: (ConfigKeyMapSnackbar) -> Unit = {},
     onDismissDialog: () -> Unit = {},
@@ -102,8 +122,6 @@ private fun ConfigKeyMapScreen(
     onSelectTriggerKeyDevice: (TriggerKeyDevice) -> Unit = {},
 ) {
     val pagerState = rememberPagerState()
-    val scope = rememberCoroutineScope()
-    val tabTitles = remember { listOf("Trigger", "Actions") }
     val snackbarHostState = remember { SnackbarHostState() }
 
     when (snackbar) {
@@ -164,6 +182,19 @@ private fun ConfigKeyMapScreen(
         }
     }
 
+    val triggerHelpUrl = stringResource(R.string.url_trigger_guide)
+    val actionHelpUrl = stringResource(R.string.url_action_guide)
+
+    val helpUrl: String by remember {
+        derivedStateOf {
+            when (pagerState.currentPage) {
+                0 -> triggerHelpUrl
+                1 -> actionHelpUrl
+                else -> error("No help url for tab page ${pagerState.currentPage}")
+            }
+        }
+    }
+
     Scaffold(
         modifier = modifier,
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
@@ -172,7 +203,8 @@ private fun ConfigKeyMapScreen(
                 BottomAppBarActions(
                     navigateBack = navigateBack,
                     isKeyMapEnabled = isKeyMapEnabled,
-                    onKeyMapEnabledChange = onKeyMapEnabledChange
+                    onKeyMapEnabledChange = onKeyMapEnabledChange,
+                    helpUrl = helpUrl
                 )
             }, floatingActionButton = {
                 FloatingActionButton(
@@ -186,19 +218,7 @@ private fun ConfigKeyMapScreen(
                     )
                 }
             })
-        }, topBar = {
-        TabRow(selectedTabIndex = pagerState.currentPage, indicator = { tabPositions ->
-            TabRowDefaults.Indicator(Modifier.pagerTabIndicatorOffset(pagerState, tabPositions))
-        }) {
-            tabTitles.forEachIndexed { index, title ->
-                Tab(selected = pagerState.currentPage == index, onClick = {
-                    scope.launch {
-                        pagerState.animateScrollToPage(index)
-                    }
-                }, text = { Text(title) })
-            }
-        }
-    }) { padding ->
+        }, topBar = { Tabs(pagerState) }) { padding ->
         HorizontalPager(
             modifier = Modifier
                 .padding(padding)
@@ -208,7 +228,30 @@ private fun ConfigKeyMapScreen(
         ) { page ->
             when (page) {
                 0 -> triggerScreen()
+                1 -> actionsScreen()
             }
+        }
+    }
+}
+
+@OptIn(ExperimentalPagerApi::class)
+@Composable
+private fun Tabs(pagerState: PagerState) {
+    val scope = rememberCoroutineScope()
+    val tabTitles = listOf(
+        stringResource(R.string.config_key_map_trigger_tab),
+        stringResource(R.string.config_key_map_actions_and_constraints_tab)
+    )
+
+    TabRow(selectedTabIndex = pagerState.currentPage, indicator = { tabPositions ->
+        TabRowDefaults.Indicator(Modifier.pagerTabIndicatorOffset(pagerState, tabPositions))
+    }) {
+        tabTitles.forEachIndexed { index, title ->
+            Tab(selected = pagerState.currentPage == index, onClick = {
+                scope.launch {
+                    pagerState.animateScrollToPage(index)
+                }
+            }, text = { Text(title) })
         }
     }
 }
@@ -216,6 +259,7 @@ private fun ConfigKeyMapScreen(
 @Composable
 private fun BottomAppBarActions(
     navigateBack: () -> Unit,
+    helpUrl: String,
     isKeyMapEnabled: Boolean,
     onKeyMapEnabledChange: (Boolean) -> Unit,
 ) {
@@ -247,12 +291,12 @@ private fun BottomAppBarActions(
     }
 
     val uriHandler = LocalUriHandler.current
-    val triggerGuideUrl = stringResource(R.string.url_trigger_guide)
 
-    Row(Modifier
-        .clip(ShapeDefaults.Medium)
-        .clickable { uriHandler.openUri(triggerGuideUrl) }
-        .padding(8.dp),
+    Row(
+        Modifier
+            .clip(ShapeDefaults.Medium)
+            .clickable { uriHandler.openUri(helpUrl) }
+            .padding(8.dp),
         verticalAlignment = Alignment.CenterVertically) {
         Text(
             stringResource(R.string.action_help),

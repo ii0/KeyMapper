@@ -63,7 +63,8 @@ fun ConfigKeyMapNavHost(
                 ConfigKeyMapScreen(
                     viewModel = configKeyMapViewModel,
                     navigateBack = navigateBack,
-                    navigator = destinationsNavigator
+                    navigator = destinationsNavigator,
+                    chooseActionResultRecipient = resultRecipient()
                 )
             }
 
